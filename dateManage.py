@@ -51,4 +51,14 @@ class SeasonData(DateManage):
         elif super().transToDate(releaseDate).month==8:
             return str(super().transToDate(releaseDate).year)+self.correspondDates[2] 
         else:
-            return str(super().transToDate(releaseDate).year)+self.correspondDates[3]                   
+            return str(super().transToDate(releaseDate).year)+self.correspondDates[3]    
+    def nYearPeriod(self,n):
+        nYearData=[]
+        firstPeriod=self.firstPeriod()
+        for i in range(n):
+            tempData=[]
+            for j in range(4):
+                nYearBeforeDate=super().nYearBefore(firstPeriod[j],i)
+                tempData.append(self.responseStatementDate(nYearBeforeDate) )
+            nYearData.append(tempData)
+        return nYearData      
