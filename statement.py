@@ -19,9 +19,15 @@ class Info(Param):
             for j in range(4):
                 thisStatement=self.getAll(nYearPeriod[i][j])
                 thisStatement.to_sql('statement'+nYearPeriod[i][j].replace('-','s'),self.statement,if_exists='replace')
-    def nYearDataFromSql(self,start_date):
+    def nYearDataFromSql(self,start_date,n):
         sd=SeasonData(start_date)
+        nYearPeriod=sd.nYearPeriod(n)
+        tempDf=pd.DataFrame([])
         conn=sqlite3.connect('../data/statementData.sqlite3')
-        df=pd.read_sql('select * from statement'+start_date.replace('-','s'),conn)
-        return df
+        for i in range(len(nYearPeriod)):
+            for j in range(4):
+                thisSeason=nYearPeriod[i][j]
+                df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
+                tempDf=pd.concat([tempDf,df],join='outer')
+        return tempDf
 
