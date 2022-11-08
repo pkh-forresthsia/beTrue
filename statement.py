@@ -26,8 +26,12 @@ class Info(Param):
         conn=sqlite3.connect('../data/statementData.sqlite3')
         for i in range(len(nYearPeriod)):
             for j in range(4):
-                thisSeason=nYearPeriod[i][j]
+                thisSeason=nYearPeriod[i][3-j]
                 df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
                 tempDf=pd.concat([tempDf,df],join='outer')
-        return tempDf
+        return tempDf.sort_values(['date'],ascending=True)
+    def getType(self,start_date,n,type):
+        tempDf=self.nYearDataFromSql(start_date,n)
+        typeDf=tempDf[tempDf['type']==type]
+        return typeDf.pivot_table(values='value',index='date',columns='stock_id')
 
