@@ -30,12 +30,6 @@ class Info(Param):
                 df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
                 tempDf=pd.concat([tempDf,df],join='outer')
         return tempDf.sort_values(['date'],ascending=True)
-    # def getType(self,start_date,n,type):
-    #     tempDf=self.nYearDataFromSql(start_date,n)
-    #     typeDf=tempDf[tempDf['type']==type]
-    #     return typeDf.pivot_table(values='value',index='date',columns='stock_id')
-    # def nYearRolling(self,start_date,n,type,stock_id):
-    #     allData=self.getType(start_date,n,type)
 class StatementManage(Info):
     def __init__(self,start_date,n):
         super().__init__()
@@ -46,6 +40,36 @@ class StatementManage(Info):
         tempDf=self.nYearDataFromSql
         typeDf=tempDf[tempDf['type']==type]
         return typeDf.pivot_table(values='value',index='date',columns='stock_id')
-    
+    def stockRolling(self,typeData,stock_id):
+        return typeData[stock_id].rolling(4).sum()
+    def rollingIncrease(self,rollingData):
+        increase=(rollingData/rollingData.shift()-1)*100
+        summaryData=pd.DataFrame({'increase':increase[increase.notnull()],'index':0})
+        for i in range(len(summaryData)):
+            summaryData['index'].iloc[i]=summaryData['increase'].iloc[i]>0
+        return summaryData
+    def increasePeriodData(self,increaseData):
+        tempPeriod=1
+        summaryData=increaseData
+        periodSummary={'increasePeriod':[],'decreasePeriod':[],'endPeriod':0}
+        for i in range(1,len(summaryData)):
+            if summaryData['index'][i]==summaryData['index'][i-1]:
+                tempPeriod=tempPeriod+1
+            else:
+                if summaryData['index'][i]==True:
+                    periodSummary["decreasePeriod"].append(tempPeriod)
+                else:
+                    periodSummary["increasePeriod"].append(tempPeriod)
+                tempPeriod=1
+        if summaryData['index'][-1]==True:
+            periodSummary['increasePeriod'].append(tempPeriod)
+            periodSummary['endPeriod']=tempPeriod
+        else:
+            periodSummary['decreasePeriod'].append(tempPeriod)
+            periodSummary['endPeriod']=tempPeriod*(-1)
+        return periodSummary
+
+
+
 
 
