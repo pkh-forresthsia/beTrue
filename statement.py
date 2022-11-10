@@ -30,8 +30,22 @@ class Info(Param):
                 df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
                 tempDf=pd.concat([tempDf,df],join='outer')
         return tempDf.sort_values(['date'],ascending=True)
-    def getType(self,start_date,n,type):
-        tempDf=self.nYearDataFromSql(start_date,n)
+    # def getType(self,start_date,n,type):
+    #     tempDf=self.nYearDataFromSql(start_date,n)
+    #     typeDf=tempDf[tempDf['type']==type]
+    #     return typeDf.pivot_table(values='value',index='date',columns='stock_id')
+    # def nYearRolling(self,start_date,n,type,stock_id):
+    #     allData=self.getType(start_date,n,type)
+class StatementManage(Info):
+    def __init__(self,start_date,n):
+        super().__init__()
+        self.start_date=start_date
+        self.n=n
+        self.nYearDataFromSql=super().nYearDataFromSql(self.start_date,self.n)
+    def getType(self,type):
+        tempDf=self.nYearDataFromSql
         typeDf=tempDf[tempDf['type']==type]
         return typeDf.pivot_table(values='value',index='date',columns='stock_id')
+    
+
 
