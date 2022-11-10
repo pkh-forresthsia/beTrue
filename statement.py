@@ -68,6 +68,15 @@ class StatementManage(Info):
             periodSummary['decreasePeriod'].append(tempPeriod)
             periodSummary['endPeriod']=tempPeriod*(-1)
         return periodSummary
+    def statementAnalysis(self,type):
+        tempData=[]
+        typeData=self.getType(type)
+        ids=self.nYearDataFromSql.pivot_table(columns='stock_id').columns
+        for i in range(len(ids)):
+            tempData.append({'stock_id':ids[i]})
+        return tempData
+        
+
 
 
 
