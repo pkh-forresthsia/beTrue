@@ -2,6 +2,7 @@ import requests
 import pandas as pd
 import numpy as np
 from dateManage import *
+import statistics as stat
 
 class Param():
     def __init__(self):
@@ -15,3 +16,19 @@ class Param():
         data=resp.json()
         data=pd.DataFrame(data['data'])
         return data
+class BasicFunction():
+    def tryEmptyMean(self,arrayData):
+        if len(arrayData)==0:
+            return 0
+        else:
+            return stat.mean(arrayData)
+    def tryEmptyMax(self,arrayData):
+        if len(arrayData)==0:
+            return 0
+        else:
+            return max(arrayData)
+    def emptyBool(self,thisSeries,booling):
+        try:
+            return thisSeries[booling]
+        except:
+            return 0
