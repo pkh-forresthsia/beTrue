@@ -73,9 +73,9 @@ class StatementManage(Info):
         bf=BasicFunction()
         tempData=[]
         typeData=self.getType(type)
-        ids=self.nYearDataFromSql.pivot_table(columns='stock_id').columns
-        for i in range(len(ids)):
-            stockId=ids[i]
+        ids=typeData.columns
+        for item in ids:
+            stockId=item
             if len(stockId)==4:
                 rollingData=self.stockRolling(typeData,stockId)
                 rollingIncreaseData=self.rollingIncrease(rollingData)
