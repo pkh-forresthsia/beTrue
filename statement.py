@@ -76,33 +76,34 @@ class StatementManage(Info):
         ids=self.nYearDataFromSql.pivot_table(columns='stock_id').columns
         for i in range(len(ids)):
             stockId=ids[i]
-            rollingData=self.stockRolling(typeData,stockId)
-            rollingIncreaseData=self.rollingIncrease(rollingData)
-            increaseNum=rollingIncreaseData.groupby(by=['index'])['increase'].count()
-            increaseMeanAll=rollingIncreaseData.groupby(by=['index'])['increase'].mean()
-            if(len(rollingIncreaseData))>0:
-                increasePeriod=self.increasePeriodData(rollingIncreaseData)
-                increasePeriodMean=bf.tryEmptyMean(increasePeriod['increasePeriod'])
-                decreasePeriodMean=bf.tryEmptyMean(increasePeriod['decreasePeriod'])
-                increasePeriodMax=bf.tryEmptyMax(increasePeriod['increasePeriod'])
-                decreasePeriodMax=bf.tryEmptyMax(increasePeriod['decreasePeriod'])
-                increaseProbability=bf.emptyBool(increaseNum,True) /len(rollingIncreaseData)
-                increaseMean=bf.emptyBool(increaseMeanAll,True)
-                decreaseMean=bf.emptyBool(increaseMeanAll,False)
-                expectGrowth=increaseProbability*increaseMean+(1-increaseProbability)*decreaseMean
-                endPeriod=increasePeriod['endPeriod']
-                tempData.append(
-                    {'stock_id':stockId,
-                    'incPeriodMean':round(increasePeriodMean,1),
-                    'decPeriodMean':round(decreasePeriodMean,1),
-                    'incPeriodMax':increasePeriodMax,
-                    'decPeriodMax':decreasePeriodMax,
-                    'endPeriod':endPeriod,
-                    'incP':round(increaseProbability,2),
-                    'incM':round(increaseMean,1),
-                    'decM':round(decreaseMean,1),
-                    'growth':round(expectGrowth,1)
-                    })
+            if len(stockId)==4:
+                rollingData=self.stockRolling(typeData,stockId)
+                rollingIncreaseData=self.rollingIncrease(rollingData)
+                increaseNum=rollingIncreaseData.groupby(by=['index'])['increase'].count()
+                increaseMeanAll=rollingIncreaseData.groupby(by=['index'])['increase'].mean()
+                if(len(rollingIncreaseData))>0 :
+                    increasePeriod=self.increasePeriodData(rollingIncreaseData)
+                    increasePeriodMean=bf.tryEmptyMean(increasePeriod['increasePeriod'])
+                    decreasePeriodMean=bf.tryEmptyMean(increasePeriod['decreasePeriod'])
+                    increasePeriodMax=bf.tryEmptyMax(increasePeriod['increasePeriod'])
+                    decreasePeriodMax=bf.tryEmptyMax(increasePeriod['decreasePeriod'])
+                    increaseProbability=bf.emptyBool(increaseNum,True) /len(rollingIncreaseData)
+                    increaseMean=bf.emptyBool(increaseMeanAll,True)
+                    decreaseMean=bf.emptyBool(increaseMeanAll,False)
+                    expectGrowth=increaseProbability*increaseMean+(1-increaseProbability)*decreaseMean
+                    endPeriod=increasePeriod['endPeriod']
+                    tempData.append(
+                        {'stock_id':stockId,
+                        'incPeriodMean':round(increasePeriodMean,1),
+                        'decPeriodMean':round(decreasePeriodMean,1),
+                        'incPeriodMax':increasePeriodMax,
+                        'decPeriodMax':decreasePeriodMax,
+                        'endPeriod':endPeriod,
+                        'incP':round(increaseProbability,2),
+                        'incM':round(increaseMean,1),
+                        'decM':round(decreaseMean,1),
+                        'growth':round(expectGrowth,1)
+                        })
         return pd.DataFrame(tempData) 
         
 
