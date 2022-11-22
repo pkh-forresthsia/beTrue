@@ -19,3 +19,4 @@ class MonthInfo(Param):
             thisMonth=dm.nMonthBefore(startDate,i)
             thisRevenue=self.getAll(thisMonth)
             thisRevenue.to_sql('revenue'+thisMonth.replace('-','s'),self.revenue,if_exists='replace')
+            print("revenue",thisMonth)

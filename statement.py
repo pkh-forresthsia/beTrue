@@ -36,18 +36,35 @@ class StatementManage(Info):
         self.start_date=start_date
         self.n=n
         self.nYearDataFromSql=super().nYearDataFromSql(self.start_date,self.n)
+        self.nYearDataFromSql["type"]=self.nYearDataFromSql["type"].str.replace("IncomeAfterTaxes","IncomeAfterTax")
     def getType(self,type):
         tempDf=self.nYearDataFromSql
         typeDf=tempDf[tempDf['type']==type]
         return typeDf.pivot_table(values='value',index='date',columns='stock_id')
     def stockRolling(self,typeData,stock_id):
         return typeData[stock_id].rolling(4).sum()
-    def rollingIncrease(self,rollingData):
-        increase=(rollingData/rollingData.shift()-1)*100
+    def rollingIncrease(self,rollingData,n=1):
+        increase=(rollingData/rollingData.shift(n)-1)*100
         summaryData=pd.DataFrame({'increase':increase[increase.notnull()],'index':0})
         for i in range(len(summaryData)):
             summaryData['index'].iloc[i]=summaryData['increase'].iloc[i]>0
         return summaryData
+    def priceModel(self,type):
+        typeData=self.getType(type)
+        ids=typeData.columns
+        tempData=[]
+        for item in ids:
+            stockId=item
+            if len(stockId)==4:
+                rollingData=self.stockRolling(typeData,stockId)
+                rollingIncreaseData=self.rollingIncrease(rollingData,4)
+                if(len(rollingIncreaseData)>0):
+                    increase=rollingIncreaseData.iloc[0].increase
+                    tempData.append({
+                        'stock_id':stockId,
+                        'increase':round(increase)})
+
+        return pd.DataFrame(tempData)
     def increasePeriodData(self,increaseData):
         tempPeriod=1
         summaryData=increaseData
