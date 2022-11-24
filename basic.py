@@ -32,3 +32,13 @@ class BasicFunction():
             return thisSeries[booling]
         except:
             return 0
+class InfoId(Param):
+    def __init__(self):
+        super().__init__()
+        self.parameter['dataset']="TaiwanStockInfo"
+    def getId(self):
+        ids=super().getData(self.parameter)[['stock_id','stock_name','industry_category']]
+        return ids[~ids['industry_category'].isin(['電子工業','化學生技醫療'])]
+    def mergeId(self,data):
+        ids=self.getId()
+        return pd.merge(ids,data,how="inner")

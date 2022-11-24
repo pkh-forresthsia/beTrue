@@ -20,6 +20,7 @@ class Info(Param):
             for j in range(4):
                 thisStatement=self.getAll(nYearPeriod[i][j])
                 thisStatement.to_sql('statement'+nYearPeriod[i][j].replace('-','s'),self.statement,if_exists='replace')
+                print(nYearPeriod[i][j])
     def nYearDataFromSql(self,start_date,n):
         sd=SeasonData(start_date)
         nYearPeriod=sd.nYearPeriod(n)
@@ -30,6 +31,7 @@ class Info(Param):
                 thisSeason=nYearPeriod[i][3-j]
                 df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
                 tempDf=pd.concat([tempDf,df],join='outer')
+        tempDf["type"]=tempDf["type"].str.replace("IncomeAfterTaxes","IncomeAfterTax")
         return tempDf.sort_values(['date'],ascending=True)
 class StatementManage(Info):
     def __init__(self,start_date,n):
@@ -37,7 +39,6 @@ class StatementManage(Info):
         self.start_date=start_date
         self.n=n
         self.nYearDataFromSql=super().nYearDataFromSql(self.start_date,self.n)
-        self.nYearDataFromSql["type"]=self.nYearDataFromSql["type"].str.replace("IncomeAfterTaxes","IncomeAfterTax")
     def getType(self,type):
         tempDf=self.nYearDataFromSql
         typeDf=tempDf[tempDf['type']==type]

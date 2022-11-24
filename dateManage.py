@@ -37,7 +37,7 @@ class SeasonData(DateManage):
         self.tempPeriod=4
         self.tempData=[]
         for i in range(3):
-            if super().daysDiffer(self.start_date,self.basePeriod()[i])>0 and super().daysDiffer(self.start_date,self.basePeriod()[i+1]):
+            if super().daysDiffer(self.start_date,self.basePeriod()[i])>0 and super().daysDiffer(self.start_date,self.basePeriod()[i+1])<=0:
                 self.tempPeriod=i+1
         for j in range(self.tempPeriod,len(self.releaseDates)):
             self.tempData.append(str(super().transToDate(self.start_date).year-1)+self.releaseDates[j])
