@@ -88,7 +88,7 @@ class StatementManage(Info):
                     increase=rollingIncreaseData.iloc[-1].increase
                     tempData.append({
                         'stock_id':stockId,
-                        'increaseEPS':round(increase)})
+                        'increaseYear':round(increase)})
 
         return pd.DataFrame(tempData)
     def increasePeriodData(self,increaseData):
@@ -130,18 +130,20 @@ class StatementManage(Info):
                     decreasePeriodMean=bf.tryEmptyMean(increasePeriod['decreasePeriod'])
                     increasePeriodMax=bf.tryEmptyMax(increasePeriod['increasePeriod'])
                     decreasePeriodMax=bf.tryEmptyMax(increasePeriod['decreasePeriod'])
-                    increaseProbability=bf.emptyBool(increaseNum,True) /len(rollingIncreaseData)
+                    dataNum=len(rollingIncreaseData)
+                    increaseProbability=bf.emptyBool(increaseNum,True) /dataNum
                     increaseMean=bf.emptyBool(increaseMeanAll,True)
                     decreaseMean=bf.emptyBool(increaseMeanAll,False)
                     expectGrowth=increaseProbability*increaseMean+(1-increaseProbability)*decreaseMean
                     endPeriod=increasePeriod['endPeriod']
                     tempData.append(
                         {'stock_id':stockId,
-                        'incPeriodMean':round(increasePeriodMean,1),
-                        'decPeriodMean':round(decreasePeriodMean,1),
-                        'incPeriodMax':increasePeriodMax,
-                        'decPeriodMax':decreasePeriodMax,
-                        'endPeriod':endPeriod,
+                        '季數':dataNum,
+                        '平均上升季數':round(increasePeriodMean,1),
+                        '平均下跌季數':round(decreasePeriodMean,1),
+                        '最大上升季數':increasePeriodMax,
+                        '最大下跌季數':decreasePeriodMax,
+                        '最新上升季數':endPeriod,
                         'incP':round(increaseProbability,2),
                         'incM':round(increaseMean,1),
                         'decM':round(decreaseMean,1),
