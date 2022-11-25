@@ -52,16 +52,17 @@ class StatementManage(Info):
             summaryData['index'].iloc[i]=summaryData['increase'].iloc[i]>0
         return summaryData
     def discountRate(self,eps,price,g=0.02,e=0.1):
-        tempPrice=0
-        r=(1+g)/(1+e)
-        x=symbols('x')
-        S=solve(eps*x*(1-x**5)+eps*x**5*(1-x)*r/(1-r)-price*(1-x))
-        for i in range(len(S)):
-            if S[i]!=1 and S[i]>0:
-                tempPrice=S[i]*(1+e)-1
-                return tempPrice
-        # return S[0]*(1+e)-1
-        
+        if eps<0:
+            return -100
+        else:
+            tempPrice=0
+            r=(1+g)/(1+e)
+            x=symbols('x')
+            S=solve(eps*x*(1-x**5)+eps*x**5*(1-x)*r/(1-r)-price*(1-x))
+            for i in range(len(S)):
+                if S[i]!=1 and S[i]>0:
+                    tempPrice=S[i]*(1+e)-1
+                    return tempPrice
     def estimatePrice(self,eps,growth1,growth2=0.02,g=0.02,e=0.1):
         r=(1+g)/(1+e)
         tempSum=0
