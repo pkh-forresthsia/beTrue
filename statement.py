@@ -2,6 +2,7 @@ from basic import *
 import sqlite3
 import sys
 from sympy import *
+from price import *
 
 sys.path.insert(0,'../data')
 
@@ -155,8 +156,29 @@ class StatementManage(Info):
                         'growth':round(expectGrowth,1)
                         })
         return pd.DataFrame(tempData) 
+    def longPeriodAnalysis(self,periodData):
+        dayInfo=DayInfoAll()
+        self.thisPrice=dayInfo.getAllPriceData(self.start_date)
+        thisPrice= self.thisPrice[['stock_id','close']]
+        typeData=periodData[['stock_id','季數','incP','growth']]
+        epsData=self.getType("EPS")
+        tempData=pd.merge(thisPrice,typeData,how='inner').set_index('stock_id')
+        tempData['價格估計']=0
+        tempData['eps']=0
+        ids=tempData.index
+        for item in ids:
+            stockId=item
+            if len(stockId)==4:
+                epsRolling=self.stockRolling(epsData,stockId)
+                if len(epsRolling)>0:
+                    eps=max(epsRolling.iloc[-1],0)
+                    growth=tempData['growth'].loc[stockId]
+                    if eps>0:
+                        priceEstimate=self.estimatePrice(eps,growth)
+                    tempData['eps'].loc[stockId]=round(eps,1)
+                    tempData['價格估計'].loc[stockId]=round(priceEstimate,0)
         
-
+        return tempData
 
 
 

@@ -28,8 +28,8 @@ class StatementModel(StatementManage):
                     eps=epsRolling.iloc[-1]
                     growthRate=[seasonInc,season4Inc]
                     maxEps=max(eps,0)
-                    maxGrowthRate=min(max(growthRate),20)/100
-                    minGrowthRate=max(min(growthRate),-20)/100
+                    maxGrowthRate=max(min(max(growthRate),20),-20)/100
+                    minGrowthRate=min(max(min(growthRate),-20),20)/100
                     overRate=min(100*eps,self.estimatePrice(maxEps,maxGrowthRate))
                     underRate=min(100*eps,self.estimatePrice(maxEps,minGrowthRate))
                     tempData.append({
