@@ -32,6 +32,8 @@ class Info(Param):
                 df=pd.read_sql('select * from statement'+thisSeason.replace('-','s'),conn)
                 tempDf=pd.concat([tempDf,df],join='outer')
         tempDf["type"]=tempDf["type"].str.replace("IncomeAfterTaxes","IncomeAfterTax")
+        tempDf["type"]=tempDf["type"].str.replace("IncomeFromContinuingOperations","IncomeAfterTax")
+        tempDf["type"]=tempDf["type"].str.replace("TotalNonoperatingIncomeAndExpense","TotalNonbusinessIncome")
         return tempDf.sort_values(['date'],ascending=True)
 class StatementManage(Info):
     def __init__(self,start_date,n):
@@ -41,7 +43,7 @@ class StatementManage(Info):
         self.nYearDataFromSql=super().nYearDataFromSql(self.start_date,self.n)
     def getType(self,type):
         tempDf=self.nYearDataFromSql
-        typeDf=tempDf[tempDf['type']==type]
+        typeDf=tempDf[tempDf['type'].str.contains(type)]
         return typeDf.pivot_table(values='value',index='date',columns='stock_id')
     def stockRolling(self,typeData,stock_id):
         return typeData[stock_id].rolling(4).sum()
@@ -113,10 +115,12 @@ class StatementManage(Info):
                 periodSummary['decreasePeriod'].append(tempPeriod)
                 periodSummary['endPeriod']=tempPeriod*(-1)
         return periodSummary
-    def periodAnalysis(self,type):
+    def periodAnalysis(self,type="IncomeAfterTax"):
         bf=BasicFunction()
         tempData=[]
         typeData=self.getType(type)
+        typeData2=self.getType("TotalNonbusinessIncome")
+        typeData=typeData-typeData2
         ids=typeData.columns
         for item in ids:
             stockId=item
@@ -141,9 +145,9 @@ class StatementManage(Info):
                         {'stock_id':stockId,
                         '季數':dataNum,
                         '平均上升季數':round(increasePeriodMean,1),
-                        '平均下跌季數':round(decreasePeriodMean,1),
+                        '*下跌1*':round(decreasePeriodMean,1),
                         '最大上升季數':increasePeriodMax,
-                        '最大下跌季數':decreasePeriodMax,
+                        '*下跌2*':decreasePeriodMax,
                         '最新上升季數':endPeriod,
                         'incP':round(increaseProbability,2),
                         'incM':round(increaseMean,1),
