@@ -127,6 +127,7 @@ class StatementManage(Info):
             stockId=item
             if len(stockId)==4:
                 rollingData=self.stockRolling(typeData,stockId)
+                rollingData2=rollingData.dropna()
                 rollingIncreaseData=self.rollingIncrease(rollingData)
                 increaseNum=rollingIncreaseData.groupby(by=['index'])['increase'].count()
                 increaseMeanAll=rollingIncreaseData.groupby(by=['index'])['increase'].mean()
@@ -141,6 +142,7 @@ class StatementManage(Info):
                     increaseMean=bf.emptyBool(increaseMeanAll,True)
                     decreaseMean=bf.emptyBool(increaseMeanAll,False)
                     expectGrowth=increaseProbability*increaseMean+(1-increaseProbability)*decreaseMean
+                    allGrowth=100*(rollingData2[-1]/rollingData2[0]-1)/dataNum
                     endPeriod=increasePeriod['endPeriod']
                     tempData.append(
                         {'stock_id':stockId,
@@ -153,18 +155,22 @@ class StatementManage(Info):
                         'incP':round(increaseProbability,2),
                         'incM':round(increaseMean,1),
                         'decM':round(decreaseMean,1),
-                        'growth':round(expectGrowth,1)
+                        'growth':round(expectGrowth,1),
+                        'growth2':round(allGrowth)
                         })
         return pd.DataFrame(tempData) 
     def longPeriodAnalysis(self,periodData):
         dayInfo=DayInfoAll()
         self.thisPrice=dayInfo.getAllPriceData(self.start_date)
         thisPrice= self.thisPrice[['stock_id','close']]
-        typeData=periodData[['stock_id','季數','incP','growth']]
+        typeData=periodData[['stock_id','季數','incP','最新上升季數','growth','growth2']]
         epsData=self.getType("EPS")
         tempData=pd.merge(thisPrice,typeData,how='inner').set_index('stock_id')
-        tempData['價格估計']=0
         tempData['eps']=0
+        tempData['價格估計']=0
+        tempData['價格估計2']=0
+        tempData['估價差%']=0
+        tempData['估價差%2']=0
         ids=tempData.index
         for item in ids:
             stockId=item
@@ -172,12 +178,17 @@ class StatementManage(Info):
                 epsRolling=self.stockRolling(epsData,stockId)
                 if len(epsRolling)>0:
                     eps=max(epsRolling.iloc[-1],0)
-                    growth=tempData['growth'].loc[stockId]
-                    if eps>0:
-                        priceEstimate=self.estimatePrice(eps,growth)
                     tempData['eps'].loc[stockId]=round(eps,1)
-                    tempData['價格估計'].loc[stockId]=round(priceEstimate,0)
-        
+                    growth=tempData['growth'].loc[stockId]
+                    growth2=tempData['growth2'].loc[stockId]
+                    if eps>0 and tempData['close'].loc[stockId]>0:
+                        priceEstimate=self.estimatePrice(eps,growth/100)
+                        priceEstimate2=self.estimatePrice(eps,growth2/100)
+                        tempData['價格估計'].loc[stockId]=round(priceEstimate)
+                        tempData['價格估計2'].loc[stockId]=round(priceEstimate2)
+                        if tempData['價格估計'].loc[stockId]>0:
+                            tempData['估價差%'].loc[stockId]=round((tempData['價格估計'].loc[stockId]/tempData['close'].loc[stockId]-1)*100)
+                            tempData['估價差%2'].loc[stockId]=round((tempData['價格估計2'].loc[stockId]/tempData['close'].loc[stockId]-1)*100)
         return tempData
 
 
