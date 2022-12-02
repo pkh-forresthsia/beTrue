@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import numpy as np
+import copy
 from dateManage import *
 import statistics as stat
 
@@ -11,6 +12,7 @@ class Param():
             'dataset':'',
             'token':'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyMi0xMC0wNyAxNToxNjowMiIsInVzZXJfaWQiOiJ1dXV1MTExMiIsImlwIjoiNjAuMjQ5LjE4MC4yMDAifQ.U_dDO8vrdB0ieB2hfh7gRz4fc2Z48kIl421UtHqankM'
         }
+        self.parameter2=copy.copy(self.parameter)
     def getData(self,parameter):
         resp=requests.get(self.url,params=parameter)
         data=resp.json()
