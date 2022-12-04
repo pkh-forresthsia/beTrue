@@ -47,7 +47,9 @@ class DownloadData(FromAPI):
         connstr='../dataBase/'+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
         multiData=self.multiStock(start_date,dataset)
-        multiData.to_sql(dataset+start_date.replace('-','s'),conn,if_exists='replace')
+        if len(multiData)>0:
+            multiData.to_sql(dataset+start_date.replace('-','s'),conn,if_exists='replace')
+            print(dataset,start_date)
     def tableInSQL(self,dataset):
         connstr='../dataBase/'+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
@@ -64,8 +66,7 @@ class DownloadData(FromAPI):
         for date in dateList:
             tableName=dataset+date.replace('-','s')
             if tableName not in tableData[:-1]:
-                self.multiData(date,dataset)
-                print(dataset,date)
+                self.multiData(date,dataset)        
     def downloadSamePeriod(self,periodType):
         fixedPeriodData=self.dataType.fixedPeriodData
         for type in fixedPeriodData[periodType]:
