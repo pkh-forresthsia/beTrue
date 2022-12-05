@@ -37,12 +37,23 @@ class DownloadData(FromAPI):
     def __init__(self):
         super().__init__()
         self.dataType=DataType()
+    def dateFromSQL(self,dataset):
+        connstr='../dataBase/latestDate/latest'+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)     
+        df=pd.read_sql('select * from latest'+dataset,conn)  
+        return df.pivot_table(columns=['date']).columns
     def allDate(self,dataset):
+        connstr='../dataBase/latestDate/latest'+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)            
         today=datetime.date.today()
-        init_date="1990-01-01"
+        init_date="1994-10-01"
         stock1=self.singleStock('1101',init_date,today,dataset)
         stock2=self.singleStock('2330',init_date,today,dataset)
-        return pd.concat([stock1,stock2]).pivot_table(columns=['date']).columns
+        if len(stock1)>0 and len(stock2)>0:
+            allDataList=pd.concat([stock1,stock2])
+            allDataList.to_sql('latest'+dataset,conn,if_exists='replace')
+        # return allDataList.pivot_table(columns=['date']).columns
+        return self.dateFromSQL(dataset)
     def multiData(self,start_date,dataset):
         connstr='../dataBase/'+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
@@ -50,6 +61,8 @@ class DownloadData(FromAPI):
         if len(multiData)>0:
             multiData.to_sql(dataset+start_date.replace('-','s'),conn,if_exists='replace')
             print(dataset,start_date)
+        else:
+            print(dataset,start_date+": not exist")
     def tableInSQL(self,dataset):
         connstr='../dataBase/'+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
@@ -97,14 +110,29 @@ class Read(DownloadData):
         for periodType in fixedPeriodData:
             if periodType=='seasonData':
                 for dataset in fixedPeriodData[periodType]:
-                    latestDate=self.allDate(dataset)[-1]
+                    # latestDate=self.allDate(dataset)[-1]
+                    latestDate=self.dateFromSQL(dataset)[-1]
                     column=self.df(latestDate,dataset).pivot_table(columns='type').columns
                     column2=self.df(latestDate,dataset).pivot_table(columns=['type','origin_name']).columns
                     self.allVar[dataset]=column
                     self.typeIndex.extend(column2)
     def checkDB(self,val):
-        if len(self.allVar)<=1:
-            self.getVar()
+        self.getVar()
         for dataType in self.allVar:
             if val in self.allVar[dataType]:
                 return dataType
+    def typeDataFromSQL(self,dataset):
+        dateList=self.dateFromSQL(dataset)
+        tableData=self.tableInSQL(dataset)
+        tempDf=pd.DataFrame([])
+        for date in dateList:
+            tableName=dataset+date.replace('-','s')
+            if tableName in tableData:
+                df=self.df(date,dataset)
+                tempDf=pd.concat([tempDf,df],join='outer')
+        return tempDf
+    def valData(self,val):
+        dataType=self.checkDB(val)
+        typeData=self.typeDataFromSQL(dataType)
+        valData=typeData[typeData['type'].str.contains(val)]
+        return valData

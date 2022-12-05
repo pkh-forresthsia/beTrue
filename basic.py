@@ -15,9 +15,12 @@ class Param():
         self.parameter2=copy.copy(self.parameter)
     def getData(self,parameter):
         resp=requests.get(self.url,params=parameter)
-        data=resp.json()
-        data=pd.DataFrame(data['data'])
-        return data
+        try:
+            data=resp.json()
+            data=pd.DataFrame(data['data'])
+            return data
+        except:
+            print("params from get Data: ",parameter)
 class BasicFunction():
     def tryEmptyMean(self,arrayData):
         if len(arrayData)==0:
