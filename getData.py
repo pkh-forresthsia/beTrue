@@ -108,10 +108,12 @@ class Read(DownloadData):
     def getVar(self):
         fixedPeriodData=self.dataType.fixedPeriodData
         for periodType in fixedPeriodData:
-            if periodType=='seasonData':
-                for dataset in fixedPeriodData[periodType]:
-                    # latestDate=self.allDate(dataset)[-1]
-                    latestDate=self.dateFromSQL(dataset)[-1]
+            for dataset in fixedPeriodData[periodType]:
+                # latestDate=self.allDate(dataset)[-1]
+                latestDate=self.dateFromSQL(dataset)[-1]
+            # if periodType=='seasonData':
+                # for dataset in fixedPeriodData[periodType]:
+                if periodType=='seasonData':
                     column=self.df(latestDate,dataset).pivot_table(columns='type').columns
                     column2=self.df(latestDate,dataset).pivot_table(columns=['type','origin_name']).columns
                     self.allVar[dataset]=column
@@ -134,5 +136,9 @@ class Read(DownloadData):
     def valData(self,val):
         dataType=self.checkDB(val)
         typeData=self.typeDataFromSQL(dataType)
-        valData=typeData[typeData['type'].str.contains(val)]
-        return valData
+        if dataType =='TaiwanStockMonthRevenue':
+            valData=typeData.pivot_table(values='revenue',index='date',columns='stock_id')
+            return valData
+        else:
+            valData=typeData[typeData['type'].str.contains(val)]
+            return valData.pivot_table(values='value',index='date',columns='stock_id')
