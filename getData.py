@@ -134,6 +134,7 @@ class DownloadData(FromAPI):
         fixedPeriodData=self.dataType.fixedPeriodData
         for type in fixedPeriodData:
             self.downloadSamePeriod(type)
+        self.downloadSingleStockPrice()
 class Read(DownloadData):
     def __init__(self):
         super().__init__()
@@ -201,6 +202,9 @@ class Read(DownloadData):
         if dataType =='TaiwanStockMonthRevenue':
             valData=typeData.pivot_table(values='revenue',index='date',columns='stock_id')
             return valData
+        elif dataType=='TaiwanStockPrice':
+            valData=type.pivot_table(values=val,index='date',columns='stock_id')
+            return valData
         else:
             valData=typeData[typeData['type'].str.contains(val)]
             return valData.pivot_table(values='value',index='date',columns='stock_id')
@@ -217,7 +221,16 @@ class Combine(Read):
                 conn=sqlite3.connect(connstr)
                 typeData.to_sql(type,conn,if_exists='replace')
                 print(type)
-    def updateCombine(sel):
+    def updateCombine(self):
+        fixPeriodData=self.dataType.fixedPeriodData
+        for period in fixPeriodData:
+            for type in fixPeriodData[period]:
+                combineData=self.read(type) 
+                combineDateList=combineData.pivot_table(columns="date").columns
+                tableData=self.tableInSQL(type) 
+                for tableName in tableData:
+                    if tableName.replace(type,"").replace("s","-") not in combineDateList:
+                              
         return
     def read(self,type):
             connstr=self.connstr+type+'.sqlite3'
