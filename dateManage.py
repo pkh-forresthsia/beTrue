@@ -20,7 +20,21 @@ class DateManage():
     def nMonthBefore(self,dateString,n):
         return (self.transToDate(dateString)-relativedelta(months=n)).strftime('%Y-%m-%d')
     def daysDiffer(self,days1,days2):
-        return (self.transToDate(days1)-self.transToDate(days2)).days    
+        return (self.transToDate(days1)-self.transToDate(days2)).days   
+
+class SeasonDate(DateManage):
+    def __init__(self):
+        super().__init__()
+    def seasonRelease(self,dateStr):
+        date=self.transToDate(dateStr)
+        if date.month==3:
+            return str(date.year)+"-05-15"
+        elif date.month==6:
+            return str(date.year)+"-08-14"
+        elif date.month==9:
+            return str(date.year)+"-11-14"
+        else:
+            return str(date.year-1)+"-03-31"
 
 # class SeasonData(DateManage):
 #     def __init__(self,start_date):

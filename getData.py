@@ -223,10 +223,13 @@ class Combine(Read):
                 conn=sqlite3.connect(connstr)
                 for tableName in tableData:
                     date=tableName.replace(type,"").replace("s","-")
+                    
                     if date not in combineDateList:
                         df=self.df(date,type)
                         df.to_sql(type,conn,if_exists='append',index=False)
-                        print(tableName)    
+                        print("append :",tableName)  
+                    else:
+                        print("checked :",tableName)
     # 單一個股資料補丁
     def singleDataPatch(self,data_id,start_date='1992-01-04',end_date='2022-12-01',dataset='TaiwanStockPrice'):
         connstr=self.connstr+dataset+'.sqlite3'
