@@ -1,0 +1,10 @@
+from getData import *
+
+class DayData(Combine):
+    def __init__(self):
+        super().__init__()
+        self.stockPrice=self.read('TaiwanStockPrice')
+    def price(self,value):
+        data=self.stockPrice.pivot_table(values=value,index='date',columns='stock_id')
+        return data
+        

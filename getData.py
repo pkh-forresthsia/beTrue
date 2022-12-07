@@ -99,6 +99,7 @@ class DownloadData(FromAPI):
             print(dataset,start_date)
         else:
             print(dataset,start_date+": not exist")
+    # 下載單一股票的區間資料
     def singleData(self,data_id,start_date,end_date,dataset):
         connstr='../dataBase/single'+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
@@ -175,6 +176,7 @@ class Read(DownloadData):
         for dataType in self.allVar:
             if val in self.allVar[dataType]:
                 return dataType
+    # 後來再改 不要用這個            
     def singleStockTypeDataFromSQL(self,dataset):
         idList=self.idListFromSQL()
         tempDf=pd.DataFrame([])
@@ -183,6 +185,7 @@ class Read(DownloadData):
             tempDf=pd.concat([tempDf,singleDf],join='outer')
             print("concat data_id",data_id)
         return tempDf
+    # 後來再改 不要用這個
     def typeDataFromSQL(self,dataset):
         dateList=self.dateFromSQL(dataset)
         tableData=self.tableInSQL(dataset)
@@ -196,18 +199,6 @@ class Read(DownloadData):
             initData=self.singleStockTypeDataFromSQL(dataset)
             tempDf=pd.concat([initData,tempDf],join='outer')
         return tempDf
-    def valData(self,val):
-        dataType=self.checkDB(val)
-        typeData=self.typeDataFromSQL(dataType)
-        if dataType =='TaiwanStockMonthRevenue':
-            valData=typeData.pivot_table(values='revenue',index='date',columns='stock_id')
-            return valData
-        elif dataType=='TaiwanStockPrice':
-            valData=type.pivot_table(values=val,index='date',columns='stock_id')
-            return valData
-        else:
-            valData=typeData[typeData['type'].str.contains(val)]
-            return valData.pivot_table(values='value',index='date',columns='stock_id')
 class Combine(Read):
     def __init__(self):
         super().__init__()
@@ -228,12 +219,36 @@ class Combine(Read):
                 combineData=self.read(type) 
                 combineDateList=combineData.pivot_table(columns="date").columns
                 tableData=self.tableInSQL(type) 
+                connstr=self.connstr+type+'.sqlite3'
+                conn=sqlite3.connect(connstr)
                 for tableName in tableData:
-                    if tableName.replace(type,"").replace("s","-") not in combineDateList:
-                              
-        return
+                    date=tableName.replace(type,"").replace("s","-")
+                    if date not in combineDateList:
+                        df=self.df(date,type)
+                        df.to_sql(type,conn,if_exists='append',index=False)
+                        print(tableName)    
+    # 單一個股資料補丁
+    def singleDataPatch(self,data_id,start_date='1992-01-04',end_date='2022-12-01',dataset='TaiwanStockPrice'):
+        connstr=self.connstr+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)        
+        self.singleData(data_id,start_date,end_date,dataset)
+        singleStock=self.singleStock(data_id,start_date,end_date,dataset)
+        singleStock.to_sql(dataset,conn,if_exists='append',index=False)
+
     def read(self,type):
             connstr=self.connstr+type+'.sqlite3'
             conn=sqlite3.connect(connstr)
             typeData=pd.read_sql('select * from '+type,conn)
-            return typeData        
+            return typeData 
+    def valData(self,val):
+        dataType=self.checkDB(val)
+        typeData=self.read(dataType)
+        if dataType =='TaiwanStockMonthRevenue':
+            valData=typeData.pivot_table(values='revenue',index='date',columns='stock_id')
+            return valData.sort_index()
+        elif dataType=='TaiwanStockPrice':
+            valData=typeData.pivot_table(values=val,index='date',columns='stock_id')
+            return valData.sort_index()
+        else:
+            valData=typeData[typeData['type'].str.contains(val)]
+            return valData.pivot_table(values='value',index='date',columns='stock_id').sort_index()                   
