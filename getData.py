@@ -68,4 +68,17 @@ class ToSQL(FromAPI):
                 self.multiStockToSQL(date,dataset)
 
 
-# class FromSQL(ToSQL):
+class FromSQL(ToSQL):
+    def __init__(self):
+        super().__init__()
+        self.connstr='../dataBase/combineData/'
+    def singleDataFromSQL(self,stock_id,type,dataset):
+        connstr=self.connstr+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)
+        if dataset in self.allType['dayData']:
+            singleData=pd.read_sql("""select date,stock_id,%s from '%s' where stock_id='%s' order by date"""%(type,dataset,stock_id),conn)
+        elif dataset in self.allType['monthData']:
+            singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id))
+        else:
+            singleData=pd.read_sql("""select date,stock_id,value from '%s' where stock_id='%s' and type='%s' order by date"""%(dataset,stock_id,type),conn)
+        return singleData
