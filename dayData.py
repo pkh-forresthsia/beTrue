@@ -59,7 +59,11 @@ class LocalValue(DayData):
         for i in range(1,len(localPeriod)):
             localPeriod['dayDiffer'][i]=dm.daysDiffer(localPeriod['day1'][i],localPeriod['day2'][i])
             localPeriod['increase%'][i]=round(localPeriod['increase%'][i])
-        return localPeriod[['stockPrice','localValue','dayDiffer','increase%']][1:]    
+        return localPeriod[['stockPrice','localValue','dayDiffer','increase%']][1:]   
+    def periodStat(self,localPeriodDetail,stat):
+        periodStat=localPeriodDetail.groupby('localValue').agg({'dayDiffer':stat,'increase%':stat})
+        return 
+    
 
 
 
