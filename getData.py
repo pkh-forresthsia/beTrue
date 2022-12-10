@@ -72,7 +72,7 @@ class FromSQL(ToSQL):
     def __init__(self):
         super().__init__()
         self.connstr='../dataBase/combineData/'
-    def singleDataFromSQL(self,stock_id,type,dataset):
+    def singleDataTypeFromSQL(self,stock_id,type,dataset):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
         if dataset in self.allType['dayData']:
@@ -82,3 +82,19 @@ class FromSQL(ToSQL):
         else:
             singleData=pd.read_sql("""select date,stock_id,value from '%s' where stock_id='%s' and type='%s' order by date"""%(dataset,stock_id,type),conn)
         return singleData
+    def singleDataFromSQL(self,stock_id,dataset):
+        connstr=self.connstr+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)
+        if dataset in self.allType['dayData']:
+            singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
+        elif dataset in self.allType['monthData']:
+            singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id))
+        else:
+            singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
+        return singleData        
+    def allDataDistinctTypeFromSQL(self,dataset):
+        connstr=self.connstr+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)
+        if dataset in self.allType['seasonData']:
+            distinctType=pd.read_sql("""select distinct type from '%s' """%(dataset),conn)        
+        return distinctType
