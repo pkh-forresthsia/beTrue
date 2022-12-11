@@ -13,6 +13,7 @@ class FromAPI(Param):
         self.parameter2['start_date']=start_date
         self.parameter2['end_date']=end_date
         self.parameter2['dataset']=dataset
+        print("get data",data_id)
         return self.getData(self.parameter2)
 
 class ToSQL(FromAPI):
@@ -37,6 +38,7 @@ class ToSQL(FromAPI):
         connstr=self.connstr+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
         dateList=pd.read_sql("""select distinct date from '%s'"""%(dataset),conn)
+        print('date in sql')
         return dateList
     def latestDate(self,dataset):
         connstr='../data/latest/'+dataset+".sqlite3"
@@ -44,34 +46,56 @@ class ToSQL(FromAPI):
         dm=DateManage()
         today=dm.todayDate()
         init_date=self.init_date
-        self.singleStockToSQL('2330',init_date,today,dataset,ifExist='replace',connstr='../data/latest/')
-        self.singleStockToSQL('1101',init_date,today,dataset,ifExist='replace',connstr='../data/latest/')
+        stock1=self.singleStock('1101',init_date,today,dataset)
+        print('get stock1')
+        stock2=self.singleStock('2330',init_date,today,dataset)
+        print('get stock1')
+        if len(stock1)>0 and len(stock2)>0:
+            allDataList=pd.concat([stock1,stock2])
+        allDataList.to_sql(dataset,conn,if_exists='replace')
         latestDate=pd.read_sql("""select distinct date from '%s'"""%(dataset),conn)
+        print("read latest date")
         return latestDate
-    def downloadBasicPriceData(self):
+    def downloadBasicPriceData(self,end_date='2022-12-09'):
         latestRevenueDate=self.latestDate("TaiwanStockMonthRevenue").iloc[-1]
         idList=self.multiStock(latestRevenueDate,"TaiwanStockMonthRevenue")['stock_id']
         initDate=self.init_date
-        dm=DateManage()
-        today=dm.todayDate()
         for stock_id in idList:
-            self.singleStockToSQL(stock_id,initDate,today,"TaiwanStockPrice")
+            self.singleStockToSQL(stock_id,initDate,end_date,"TaiwanStockPrice")
+        print('download basic price data')
     def downloadTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         for date in latestDate:
             self.multiStockToSQL(date,dataset)
+        print('download type data')
+    def downloadAll(self):
+        dm=DateManage()
+        today=dm.todayDate()
+        self.downloadBasicPriceData(today)
+        allType=self.allType
+        for type in allType['seasonData']:
+            self.downloadTypeData(type)
+        print('down load season data')
+        for type in allType['monthData']:
+            self.downloadTypeData(type)
+        print('down load month data')
     def updateTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         dateInSQL=self.dateInSQL(dataset)
-        for date in latestDate:
-            if date not in dateInSQL:
-                self.multiStockToSQL(date,dataset)
-
+        for i in range(len(latestDate)):
+            if latestDate[i] not in dateInSQL:
+                self.multiStockToSQL(latestDate[i],dataset)
+    def updateAll(self):
+        allType=self.allType
+        for periodType in allType:
+            for type in allType[periodType]:
+                self.updateTypeData(type)
+                print(type)
 
 class FromSQL(ToSQL):
     def __init__(self):
         super().__init__()
-        self.connstr='../dataBase/combineData/'
+        self.connstr='../data/'
     def singleDataTypeFromSQL(self,stock_id,type,dataset):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
@@ -96,5 +120,5 @@ class FromSQL(ToSQL):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
         if dataset in self.allType['seasonData']:
-            distinctType=pd.read_sql("""select distinct type from '%s' """%(dataset),conn)        
+            distinctType=pd.read_sql("""select distinct type,origin_name from '%s' order by type"""%(dataset),conn)        
         return distinctType
