@@ -26,20 +26,20 @@ class ToSQL(FromAPI):
         conn=sqlite3.connect(connstr)
         if len(singleStockData)>0:
             singleStockData.to_sql(dataset,conn,if_exists=ifExist,index=False)
-            print(dataset,data_id,start_date,end_date," to sql")
+            print(dataset,data_id,start_date,end_date,ifExist," to sql")
     def multiStockToSQL(self, start_date, dataset,ifExist='append',connstr='../data/'):
         multiStockData=self.multiStock(start_date,dataset)
         connstr=connstr+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
         if len(multiStockData)>0:
             multiStockData.to_sql(dataset,conn,if_exists=ifExist,index=False)
-            print(dataset,start_date," to sql")
+            print(dataset,start_date,ifExist," to sql")
     def dateInSQL(self,dataset):
         connstr=self.connstr+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
         dateList=pd.read_sql("""select distinct date from '%s'"""%(dataset),conn)
         print('date in sql')
-        return dateList
+        return dateList['date']
     def latestDate(self,dataset):
         connstr='../data/latest/'+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
@@ -47,22 +47,26 @@ class ToSQL(FromAPI):
         today=dm.todayDate()
         init_date=self.init_date
         stock1=self.singleStock('1101',init_date,today,dataset)
-        print('get stock1')
         stock2=self.singleStock('2330',init_date,today,dataset)
-        print('get stock1')
         if len(stock1)>0 and len(stock2)>0:
             allDataList=pd.concat([stock1,stock2])
-        allDataList.to_sql(dataset,conn,if_exists='replace')
+            allDataList.to_sql(dataset,conn,if_exists='replace')
         latestDate=pd.read_sql("""select distinct date from '%s'"""%(dataset),conn)
         print("read latest date")
-        return latestDate
-    def downloadBasicPriceData(self,end_date='2022-12-09'):
+        return latestDate['date']
+    def idList(self):
         latestRevenueDate=self.latestDate("TaiwanStockMonthRevenue").iloc[-1]
         idList=self.multiStock(latestRevenueDate,"TaiwanStockMonthRevenue")['stock_id']
+        return idList
+    def downloadBasicPriceData(self,end_date='2022-12-09'):
+        idList=self.idList()
         initDate=self.init_date
         for stock_id in idList:
             self.singleStockToSQL(stock_id,initDate,end_date,"TaiwanStockPrice")
         print('download basic price data')
+    def deleteBasicPriceData(self):
+        idlist=self.idList()
+        idInSQL=pd.read_sql()
     def downloadTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         for date in latestDate:
@@ -82,9 +86,10 @@ class ToSQL(FromAPI):
     def updateTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         dateInSQL=self.dateInSQL(dataset)
-        for i in range(len(latestDate)):
-            if latestDate[i] not in dateInSQL:
-                self.multiStockToSQL(latestDate[i],dataset)
+        for date in latestDate:
+            if date not in dateInSQL.tolist():
+                print(date,dataset,"update test")
+                # self.multiStockToSQL(date,dataset)
     def updateAll(self):
         allType=self.allType
         for periodType in allType:
@@ -96,29 +101,63 @@ class FromSQL(ToSQL):
     def __init__(self):
         super().__init__()
         self.connstr='../data/'
-    def singleDataTypeFromSQL(self,stock_id,type,dataset):
+    def dataSetFromSQL(self,dataset):
         connstr=self.connstr+dataset+'.sqlite3'
-        conn=sqlite3.connect(connstr)
+        conn=sqlite3.connect(connstr)    
+        datasetData=pd.read_sql("""
+            select * from '%s' 
+        """%(dataset),conn)
+        return datasetData
+    def typeDataFromSQL(self,type,dataset):
+        connstr=self.connstr+dataset+'.sqlite3'
+        conn=sqlite3.connect(connstr)        
         if dataset in self.allType['dayData']:
-            singleData=pd.read_sql("""select date,stock_id,%s from '%s' where stock_id='%s' order by date"""%(type,dataset,stock_id),conn)
+            singleData=pd.read_sql("""select date,stock_id,%s from '%s'  """%(type,dataset),conn)
         elif dataset in self.allType['monthData']:
-            singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id))
+            singleData=pd.read_sql("""select date,stock_id,revenue from '%s'  """%(dataset),conn)
         else:
-            singleData=pd.read_sql("""select date,stock_id,value from '%s' where stock_id='%s' and type='%s' order by date"""%(dataset,stock_id,type),conn)
+            singleData=pd.read_sql("""select date,stock_id,value from '%s'  where type='%s' """%(dataset,type),conn)
         return singleData
+    # def singleDataTypeFromSQL(self,stock_id,type,dataset):
+    #     connstr=self.connstr+dataset+'.sqlite3'
+    #     conn=sqlite3.connect(connstr)
+    #     if dataset in self.allType['dayData']:
+    #         singleData=pd.read_sql("""select date,stock_id,%s from '%s' where stock_id='%s' order by date"""%(type,dataset,stock_id),conn)
+    #     elif dataset in self.allType['monthData']:
+    #         singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id))
+    #     else:
+    #         singleData=pd.read_sql("""select date,stock_id,value from '%s' where stock_id='%s' and type='%s' order by date"""%(dataset,stock_id,type),conn)
+    #     return singleData
     def singleDataFromSQL(self,stock_id,dataset):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
         if dataset in self.allType['dayData']:
             singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
         elif dataset in self.allType['monthData']:
-            singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id))
+            singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id),conn)
         else:
             singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
         return singleData        
-    def allDataDistinctTypeFromSQL(self,dataset):
-        connstr=self.connstr+dataset+'.sqlite3'
-        conn=sqlite3.connect(connstr)
-        if dataset in self.allType['seasonData']:
-            distinctType=pd.read_sql("""select distinct type,origin_name from '%s' order by type"""%(dataset),conn)        
-        return distinctType
+    
+    def allTypeFromSQL(self):
+        typeInDataSet=self.typeInDataset
+        seasonDataset=self.allType['seasonData']
+        for dataset in seasonDataset:
+            connstr=self.connstr+dataset+'.sqlite3'
+            conn=sqlite3.connect(connstr)
+            s="""select distinct type from '%s' """%(dataset)
+            typeData=pd.read_sql(s,conn)['type'].tolist()
+            typeInDataSet[dataset]=typeData
+        return typeInDataSet
+class FromType(FromSQL):
+    def __init__(self):
+        super().__init__()
+        self.connstr='../data/'
+        self.typeInDataSet=self.allTypeFromSQL()   
+    def data(self,type):
+        typeInDataSet=self.typeInDataSet
+        for typeSet in typeInDataSet:
+            if type in typeInDataSet[typeSet]:
+                # print(type,typeSet,typeInDataSet[typeSet])
+                return self.typeDataFromSQL(type,typeSet)
+

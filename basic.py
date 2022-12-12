@@ -13,13 +13,17 @@ class Param():
         self.parameter2=copy.copy(self.parameter)  
         self.init_date='1990-01-01'
         self.allType={
+            'monthData':["TaiwanStockMonthRevenue"],
+            'dayData':["TaiwanStockPrice"],     
             'seasonData':[
                 "TaiwanStockFinancialStatements",
                 "TaiwanStockBalanceSheet",
                 "TaiwanStockCashFlowsStatement",
-            ],
-            'monthData':["TaiwanStockMonthRevenue"],
-            'dayData':["TaiwanStockPrice"],        
+            ],   
+        }
+        self.typeInDataset={
+            "TaiwanStockMonthRevenue":['revenue'],
+            "TaiwanStockPrice":['Trading_Volume','Trading_money','open','max','min','close','spread','Trading_turnover']
         }
     def getData(self,parameter):
         resp=requests.get(self.url,params=parameter)
