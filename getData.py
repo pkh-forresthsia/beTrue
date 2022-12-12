@@ -64,9 +64,9 @@ class ToSQL(FromAPI):
         for stock_id in idList:
             self.singleStockToSQL(stock_id,initDate,end_date,"TaiwanStockPrice")
         print('download basic price data')
-    def deleteBasicPriceData(self):
-        idlist=self.idList()
-        idInSQL=pd.read_sql()
+    # def deleteBasicPriceData(self):
+    #     idlist=self.idList()
+    #     idInSQL=pd.read_sql()
     def downloadTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         for date in latestDate:
@@ -88,8 +88,8 @@ class ToSQL(FromAPI):
         dateInSQL=self.dateInSQL(dataset)
         for date in latestDate:
             if date not in dateInSQL.tolist():
-                print(date,dataset,"update test")
-                # self.multiStockToSQL(date,dataset)
+                # print(date,dataset,"update test")
+                self.multiStockToSQL(date,dataset)
     def updateAll(self):
         allType=self.allType
         for periodType in allType:
@@ -108,15 +108,15 @@ class FromSQL(ToSQL):
             select * from '%s' 
         """%(dataset),conn)
         return datasetData
-    def typeDataFromSQL(self,type,dataset):
+    def typeDataFromSQL(self,type,dataset,start_date,end_date):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)        
         if dataset in self.allType['dayData']:
-            singleData=pd.read_sql("""select date,stock_id,%s from '%s'  """%(type,dataset),conn)
+            singleData=pd.read_sql("""select date,stock_id,%s from '%s'  where date between '%s' and '%s'"""%(type,dataset,start_date,end_date),conn)
         elif dataset in self.allType['monthData']:
-            singleData=pd.read_sql("""select date,stock_id,revenue from '%s'  """%(dataset),conn)
+            singleData=pd.read_sql("""select date,stock_id,revenue from '%s'  where date between '%s' and '%s'"""%(dataset,start_date,end_date),conn)
         else:
-            singleData=pd.read_sql("""select date,stock_id,value from '%s'  where type='%s' """%(dataset,type),conn)
+            singleData=pd.read_sql("""select date,stock_id,value from '%s'  where type='%s' and date between '%s' and '%s'"""%(dataset,type,start_date,end_date),conn)
         return singleData
     # def singleDataTypeFromSQL(self,stock_id,type,dataset):
     #     connstr=self.connstr+dataset+'.sqlite3'
@@ -154,10 +154,13 @@ class FromType(FromSQL):
         super().__init__()
         self.connstr='../data/'
         self.typeInDataSet=self.allTypeFromSQL()   
-    def data(self,type):
+    def data(self,type,n=12):
         typeInDataSet=self.typeInDataSet
         for typeSet in typeInDataSet:
             if type in typeInDataSet[typeSet]:
+                latestDate=self.latestDate(typeSet)
+                end_date=latestDate[-1]
+                start_date=latestDate[-n]
                 # print(type,typeSet,typeInDataSet[typeSet])
-                return self.typeDataFromSQL(type,typeSet)
+                return self.typeDataFromSQL(type,typeSet,start_date,end_date)
 
