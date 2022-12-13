@@ -4,6 +4,7 @@ import sqlite3
 class FromAPI(Param):
     def __init__(self):
         super().__init__()
+        self.dm=DateManage()
     def multiStock(self,start_date,dataset):
         self.parameter['start_date']=start_date
         self.parameter['dataset']=dataset
@@ -15,20 +16,23 @@ class FromAPI(Param):
         self.parameter2['dataset']=dataset
         print("get data",data_id)
         return self.getData(self.parameter2)
-
+    def addStamp(self,dataFrame):
+        dataFrame['dateStamp']=0
+        for i in range(len(dataFrame)):
+            dataFrame['dateStamp'][i]=self.dm.getTimeStamp(dataFrame['date'][i]) 
 class ToSQL(FromAPI):
     def __init__(self):
         super().__init__()
         self.connstr='../data/'
     def singleStockToSQL(self,data_id,start_date,end_date,dataset,ifExist='append',connstr='../data/'):
-        singleStockData=self.singleStock(data_id,start_date,end_date,dataset)
+        singleStockData=self.addStamp(self.singleStock(data_id,start_date,end_date,dataset))
         connstr=connstr+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
         if len(singleStockData)>0:
             singleStockData.to_sql(dataset,conn,if_exists=ifExist,index=False)
             print(dataset,data_id,start_date,end_date,ifExist," to sql")
     def multiStockToSQL(self, start_date, dataset,ifExist='append',connstr='../data/'):
-        multiStockData=self.multiStock(start_date,dataset)
+        multiStockData=self.addStamp(self.multiStock(start_date,dataset))
         connstr=connstr+dataset+".sqlite3"
         conn=sqlite3.connect(connstr)
         if len(multiStockData)>0:
@@ -64,9 +68,6 @@ class ToSQL(FromAPI):
         for stock_id in idList:
             self.singleStockToSQL(stock_id,initDate,end_date,"TaiwanStockPrice")
         print('download basic price data')
-    # def deleteBasicPriceData(self):
-    #     idlist=self.idList()
-    #     idInSQL=pd.read_sql()
     def downloadTypeData(self,dataset):
         latestDate=self.latestDate(dataset)
         for date in latestDate:
@@ -76,7 +77,7 @@ class ToSQL(FromAPI):
         dm=DateManage()
         today=dm.todayDate()
         self.downloadBasicPriceData(today)
-        allType=self.allType
+        allType=self.allDataset
         for type in allType['seasonData']:
             self.downloadTypeData(type)
         print('down load season data')
@@ -91,7 +92,7 @@ class ToSQL(FromAPI):
                 # print(date,dataset,"update test")
                 self.multiStockToSQL(date,dataset)
     def updateAll(self):
-        allType=self.allType
+        allType=self.allDataset
         for periodType in allType:
             for type in allType[periodType]:
                 self.updateTypeData(type)
@@ -131,9 +132,9 @@ class FromSQL(ToSQL):
     def singleDataFromSQL(self,stock_id,dataset):
         connstr=self.connstr+dataset+'.sqlite3'
         conn=sqlite3.connect(connstr)
-        if dataset in self.allType['dayData']:
+        if dataset in self.allDataset['dayData']:
             singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
-        elif dataset in self.allType['monthData']:
+        elif dataset in self.allDataset['monthData']:
             singleData=pd.read_sql("""select date,stock_id,revenue from '%s' where sotck_id='%s' order by date"""%(dataset,stock_id),conn)
         else:
             singleData=pd.read_sql("""select * from '%s' where stock_id='%s' order by date"""%(dataset,stock_id),conn)
@@ -141,7 +142,7 @@ class FromSQL(ToSQL):
     
     def allTypeFromSQL(self):
         typeInDataSet=self.typeInDataset
-        seasonDataset=self.allType['seasonData']
+        seasonDataset=self.allDataset['seasonData']
         for dataset in seasonDataset:
             connstr=self.connstr+dataset+'.sqlite3'
             conn=sqlite3.connect(connstr)
@@ -158,9 +159,8 @@ class FromType(FromSQL):
         typeInDataSet=self.typeInDataSet
         for typeSet in typeInDataSet:
             if type in typeInDataSet[typeSet]:
-                latestDate=self.latestDate(typeSet)
+                latestDate=self.dateInSQL(typeSet).tolist()
                 end_date=latestDate[-1]
                 start_date=latestDate[-n]
-                # print(type,typeSet,typeInDataSet[typeSet])
-                return self.typeDataFromSQL(type,typeSet,start_date,end_date)
+                return self.typeDataFromSQL(type,typeSet,start_date,end_date).pivot_table(index='date',values=type,columns='stock_id')
 

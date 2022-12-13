@@ -11,8 +11,8 @@ class Param():
             'token':'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJkYXRlIjoiMjAyMi0xMC0wNyAxNToxNjowMiIsInVzZXJfaWQiOiJ1dXV1MTExMiIsImlwIjoiNjAuMjQ5LjE4MC4yMDAifQ.U_dDO8vrdB0ieB2hfh7gRz4fc2Z48kIl421UtHqankM'
         }
         self.parameter2=copy.copy(self.parameter)  
-        self.init_date='1990-01-01'
-        self.allType={
+        self.init_date='2006-01-01'
+        self.allDataset={
             'monthData':["TaiwanStockMonthRevenue"],
             'dayData':["TaiwanStockPrice"],     
             'seasonData':[

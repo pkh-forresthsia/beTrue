@@ -8,6 +8,10 @@ class DateManage():
     # 轉化成日期
     def transToDate(self,dateString):
         return datetime.datetime.strptime(dateString,'%Y-%m-%d')
+    # get time stamp
+    def getTimeStamp(self,dateString):
+        date=self.transToDate(dateString)
+        return datetime.datetime.timestamp(date)
     # 日期轉為文字    
     def transToString(self,date):
         return date.strftime('%Y-%m-%d')
