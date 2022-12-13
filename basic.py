@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import copy
 from dateManage import *
+import warnings
+
+warnings.filterwarnings('ignore')
 
 class Param():
     def __init__(self):
