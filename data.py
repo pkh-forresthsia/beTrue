@@ -10,7 +10,7 @@ class FromAPI(Param):
         self.parameter['dataset']=dataset
         try:
             getData=self.getData(self.parameter)
-            print("get multi data: ")
+            print("get multi data: ",start_date,dataset)
             return getData
         except:
             print("multi data does not get: ",start_date,dataset)
@@ -71,8 +71,9 @@ class Update(ToSQL):
         init_date=self.init_date
         today=self.dm.todayDate()
         for period in allDataset:
-            self.singleStockToSQL('1101',init_date,today,allDataset[period][0],0) 
-            self.singleStockToSQL('2330',init_date,today,allDataset[period][0],0)
+            for dataset in allDataset[period]:
+                self.singleStockToSQL('1101',init_date,today,dataset,0) 
+                self.singleStockToSQL('2330',init_date,today,dataset,0)
     def updateId(self):
         dataset=self.allDataset['monthData'][0]
         latestDate=self.latestDate(dataset).iloc[-1]
@@ -85,7 +86,7 @@ class Update(ToSQL):
         return dateList['date']
     def dateInSQL(self,dataset):
         connstr=self.connstr1+dataset+".db"
-        conn=sqlite3.conncet(connstr)
+        conn=sqlite3.connect(connstr)
         dateList=pd.read_sql("""select distinct date from '%s' order by date"""%(dataset),conn)
         return dateList['date']
 
@@ -125,22 +126,27 @@ class Update(ToSQL):
         self.updateId()
         self.downloadSinglePriceData()
         for dataset in allDataset['monthData']:
-            self.multiStockToSQL(dataset)
+            self.downloadDataset(dataset)
         for dataset in allDataset['seasonData']:
-            self.multiStockToSQL(dataset)
+            self.downloadDataset(dataset)
+        # self.downloadDataset('TaiwanStockBalanceSheet')
+        # self.downloadDataset('TaiwanStockCashFlowsStatement')
     def updateDataset(self,dataset):  
         latestDate=self.latestDate(dataset)
         dateInSQL=self.dateInSQL(dataset)
         for date in latestDate:  
             if date not in dateInSQL.tolist():
-                print(date)
+                self.multiStockToSQL(date,dataset)
+                # print(date)
     def updateAll(self):
         self.updateDate()
+        self.updateId()
         allDataset=self.allDataset
         for period in allDataset:
             for dataset in allDataset[period]:
-                self.multiStockToSQL(dataset)
-    
+                self.updateDataset(dataset)
+    def deleteStock(self,stock_id):
+        return stock_id
 class FromSQL(Update):
     def __init__(self):
         super().__init__()
@@ -149,10 +155,20 @@ class FromSQL(Update):
         conn=sqlite3.connect(connstr)
         s="""select * from '%s' """%(dataset)
         data=pd.read_sql(s,conn)
-        seasonDataset=self.allDataset['seasonData'] 
-        if dataset in seasonDataset:
-            data=data.pivot_table(index='date',columns='stock_id',values==)
-        return data      
+        return data   
+    def typeDataFromSQL(self,type,dataset):
+        connstr=self.connstr1+dataset+".db"
+        conn=sqlite3.connect(connstr)
+        allDataset=self.allDataset
+        if dataset in allDataset['seasonData']:
+            s="""select * from '%s' where type='%s' """%(dataset,type)
+            data=pd.read_sql(s,conn)
+            data=data.pivot_table(index='date',columns='stock_id',values='value')
+        else:
+            s="""select * from '%s' """%(dataset)    
+            data=pd.read_sql(s,conn)
+            data=data.pivot_table(index='date',columns='stock_id',values=type)
+        return data
     def periodDatasetFromSQL(self,dataset,start_date,end_date):
         startDate=self.dm.getTimeStamp(start_date)
         endDate=self.dm.getTimeStamp(end_date)
@@ -176,7 +192,10 @@ class FromSQL(Update):
             s="""select distinct type from '%s' """%(dataset)
             typeData=pd.read_sql(s,conn)['type'].tolist()
             typeInDataset[dataset]=typeData
-        return typeInDataset   
+        return typeInDataset  
+    def typeMap(self,dataset): 
+        dataSet=self.datasetFromSQL(dataset)
+        return dataSet.pivot_table(index=['type','origin_name'],values='stock_id')     
 class FromType(FromSQL):        
     def __init__(self):
         super().__init__()
@@ -185,7 +204,7 @@ class FromType(FromSQL):
         typeInDataset=self.typeInDataSet
         for typeset in typeInDataset:
             if type in typeInDataset[typeset]:
-                return self.type
+                return self.typeDataFromSQL(type,typeset)
 
         
 

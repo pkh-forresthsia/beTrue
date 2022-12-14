@@ -1,2 +1,2 @@
-from getData import *
+from data import *
 
