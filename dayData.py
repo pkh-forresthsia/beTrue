@@ -1,6 +1,6 @@
 from data import *
 
-class DayData(FromSQL):
+class DayData(FromType):
     def __init__(self):
         super().__init__()
         self.price=self.datasetFromSQL("TaiwanStockPrice")
@@ -10,11 +10,11 @@ class LocalValue(DayData):
     def __init__(self):
         super().__init__()
     def getLocal(self,n,type='max',stock_id="TAIEX"):
+        priceData=self.price.pivot_table(index='date',values='max',columns='stock_id')[stock_id]
         if type=='max':
-            priceData=self.max[stock_id].dropna()
+            # priceData=self.max[stock_id].dropna()
             priceDataRb=priceData.rolling(n).max()
         else:
-            priceData=self.min[stock_id].dropna()
             priceDataRb=priceData.rolling(n).min()
         df=pd.concat({'stockPrice':priceData,'rollingBefore':priceDataRb},axis=1)
         return df
