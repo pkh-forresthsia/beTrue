@@ -4,11 +4,12 @@ class DayData(FromSQL):
     def __init__(self):
         super().__init__()
         self.price=self.datasetFromSQL("TaiwanStockPrice")
+        self.connstrLocalValue='../data/localValue/'
 class LocalValue(DayData):
     def __init__(self):
         super().__init__()
     def getLocal(self,n,type='max',stock_id="TAIEX"):
-        priceData=self.price.pivot_table(index='date',values='max',columns='stock_id')[stock_id]
+        priceData=self.price.pivot_table(index='date',values=type,columns='stock_id')[stock_id]
         if type=='max':
             # priceData=self.max[stock_id].dropna()
             priceDataRb=priceData.rolling(n).max()
@@ -56,4 +57,15 @@ class LocalValue(DayData):
         for i in range(1,len(localPeriod)):
             localPeriod['dayDiffer'][i]=dm.daysDiffer(localPeriod['day1'][i],localPeriod['day2'][i])
             localPeriod['increase%'][i]=round(localPeriod['increase%'][i])
-        return localPeriod[['stockPrice','localValue','dayDiffer','increase%']][1:]          
+        return localPeriod[['stockPrice','localValue','dayDiffer','increase%']][1:]      
+    def periodDetailToSQL(self,n=20,stock_id="TAIEX"):
+        periodDetail=self.localPeriodDetail(n,stock_id).reset_index()    
+        connstr=self.connstrLocalValue+'localValue'+'.db'
+        conn=sqlite3.connect(connstr)
+        periodDetail.to_sql('localValueP'+str(n)+'S'+stock_id,conn,if_exists='replace',index=False)
+    def periodDetailFromSQL(self,n=20,stock_id="TAIEX"):
+        connstr=self.connstrLocalValue+'localValue'+'.db'
+        conn=sqlite3.connect(connstr)
+        s="""select * from localValueP%sS%s """%(n,stock_id)
+        data=pd.read_sql(s,conn)
+        return data

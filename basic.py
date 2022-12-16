@@ -37,4 +37,23 @@ class Param():
             data=pd.DataFrame(data['data'])
             return data
         except:
-            print('request error')      
+            print('request error')    
+class InfoId(Param):
+    def __init__(self):
+        super().__init__()
+        self.parameter['dataset']="TaiwanStockInfo"
+    def getId(self):
+        ids=super().getData(self.parameter)[['stock_id','stock_name','industry_category']]
+        return ids[~ids['industry_category'].isin(['電子工業','化學生技醫療'])]
+    def mergeId(self,data):
+        ids=self.getId()
+        return pd.merge(ids,data,how="inner")  
+
+class DataTrans():
+    def nMean(self,n,pivotTable):
+        return pivotTable.rolling(n).mean()
+    def nShift(self,n,pivotTable):
+        return pivotTable.shift(n,axis=0)
+    def nPeriodIncrease(self,n,pivotTable,m=1):
+        mTable=self.nMean(m,pivotTable)
+        return round((mTable/self.nShift(n,mTable)-1)*100)

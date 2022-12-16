@@ -145,8 +145,8 @@ class Update(ToSQL):
         for period in allDataset:
             for dataset in allDataset[period]:
                 self.updateDataset(dataset)
-    def deleteStock(self,stock_id):
-        return stock_id
+    # def deleteStock(self,stock_id):
+    #     return stock_id
 class FromSQL(Update):
     def __init__(self):
         super().__init__()
