@@ -52,6 +52,8 @@ class InfoId(Param):
 class DataTrans():
     def nMean(self,n,pivotTable):
         return pivotTable.rolling(n).mean()
+    def nSum(self,n,pivotTable):
+        return pivotTable.rolling(n).sum()
     def nShift(self,n,pivotTable):
         return pivotTable.shift(n,axis=0)
     def nPeriodIncrease(self,n,pivotTable,m=1):

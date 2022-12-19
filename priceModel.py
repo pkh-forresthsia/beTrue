@@ -1,3 +1,39 @@
+from dayData import *
+from seasonData import *
+
+class DiscountModel(StatementData):
+    def __init__(self):
+        super().__init__()   
+        self.latestDay=self.latestDate("TaiwanStockPrice").iloc[-1]
+    def discountRate(self,eps,price,g=0.02,e=0.1):
+        if eps<0:
+            return -100
+        else:
+            tempPrice=0
+            r=(1+g)/(1+e)
+            x=symbols('x')
+            S=solve(eps*x*(1-x**5)+eps*x**5*(1-x)*r/(1-r)-price*(1-x))
+            for i in range(len(S)):
+                if S[i]!=1 and S[i]>0:
+                    tempPrice=S[i]*(1+e)-1
+                    return tempPrice
+    def latestPrice(self):
+        dataset="TaiwanStockPrice"
+        connstr=self.connstr1+dataset+".db"
+        conn=sqlite3.connect(connstr)
+        s="""select stock_id,close from '%s' where date='%s'"""%(dataset,self.latestDay)
+        data=pd.read_sql(s,conn)
+        data=data.set_index('stock_id')['close']
+        return data
+    def discountTable(self,epsSeries):
+        data=pd.DataFrame({'EPS4season':epsSeries,'price':self.latestPrice()})
+        data=data[(data['EPS4season'].notna())&(data['price'].notna())]
+        data['disRate']=-100
+        for i in range(len(data)):
+            if data['EPS4season'][i]>0:
+                data['disRate'][i]=self.discountRate(data['EPS4season'][i],data['price'][i])
+                print(data.index[i])
+        return data
 # from price import *
 # from statement import *
 
