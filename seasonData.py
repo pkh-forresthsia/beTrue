@@ -20,7 +20,9 @@ class SeasenData(FromSQL):
         return datasetFromTable
     def nYearIncrease(self,n,table):
         nperiodIncrease=self.dt.nPeriodIncrease(n*self.yearSeason,table,self.yearSeason).iloc[-1]
-        data=nperiodIncrease[nperiodIncrease.notna()]
+        data=nperiodIncrease
+        # data=nperiodIncrease.iloc[-1]
+        data=data[data.notna()]
         for i in range(len(data)):
             data[i]=(data[i]/100+1)**(1/n)-1
         return data
@@ -36,7 +38,6 @@ class StatementData(SeasenData):
         statement=self.statement
         typeData=self.statement[statement['type']==type].pivot_table(index='date',values='value',columns='stock_id')   
         return typeData
-
     def estimatePrice(self,eps,growth1,growth2=0.02,g=0.02,e=0.1,n=5):
         r=(1+g)/(1+e)
         tempSum=0
@@ -56,5 +57,5 @@ class StatementData(SeasenData):
         for i in range(len(data)):
             if data['EPS4season'][i]>0 and (data['growth'][i]>=0 or data['growth'][i]<0):
                 data['estimatePrice'][i]=self.estimatePrice(data['EPS4season'][i],data['growth'][i])
-        return data
+        return data[data['estimatePrice']!=0]
 

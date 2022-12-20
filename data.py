@@ -169,14 +169,15 @@ class FromSQL(Update):
             data=pd.read_sql(s,conn)
             data=data.pivot_table(index='date',columns='stock_id',values=type)
         return data
-    def periodDatasetFromSQL(self,dataset,start_date,end_date):
-        startDate=self.dm.getTimeStamp(start_date)
-        endDate=self.dm.getTimeStamp(end_date)
-        s="""select * form '%s' where dateStamp between '%s' and '%s"""%(dataset,startDate,endDate)
+    def singleDateDatasetFromSQL(self,dataset,start_date):
+        s="""select * from '%s' where date='%s' """%(dataset,start_date)
         connstr=self.connstr1+dataset+".db"
         conn=sqlite3.connect(connstr)
         data=pd.read_sql(s,conn)
         return data  
+    def latestDataFromSQL(self,dataset):
+        latestDate=self.latestDate(dataset).iloc[-1]
+        return self.singleDateDatasetFromSQL(dataset,latestDate)
     def singleDataFromSQL(self,stock_id,dataset):
         connstr=self.connstr1+dataset+".db"
         conn=sqlite3.connect(connstr)
