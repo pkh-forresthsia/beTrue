@@ -8,6 +8,13 @@ class DayData(FromSQL):
         self.yearDate=250
         self.monthDate=20
         self.seasonDate=60
+    def priceType(self):
+        return self.price.pivot_table(index='date',columns='stock_id',values=type)
+    def priceIncrease(self,start_date,end_date):
+        priceClose=self.priceType('close')
+        priceIncrease=priceClose.loc[end_date]/priceClose.loc[start_date]-1
+        return priceIncrease.sort_values()
+
 class LocalValue(DayData):
     def __init__(self):
         super().__init__()

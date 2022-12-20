@@ -34,4 +34,13 @@ class DateManage():
         elif date.month==9:
             return str(date.year)+"-11-14"
         else:
-            return str(date.year-1)+"-03-31"   
+            return str(date.year-1)+"-03-31"  
+    def monthRelease(self,dateStr):
+        date=self.transToDate(dateStr)
+        if date.month==1:
+            return str(date.year-1)+"-12-10"
+        else:
+            if len(str(date.month-1))==1:
+                return str(date.year)+"-0"+str(date.month-1)+"-10"
+            else:
+                return str(date.year)+"-"+str(date.month-1)+"-10" 
