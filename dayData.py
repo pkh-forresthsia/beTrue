@@ -8,13 +8,29 @@ class DayData(FromSQL):
         self.yearDate=250
         self.monthDate=20
         self.seasonDate=60
-    def priceType(self):
-        return self.price.pivot_table(index='date',columns='stock_id',values=type)
+class RelativeStrong(FromSQL):
+    def __init__(self):
+        super().__init__()
+        self.dataset="TaiwanStockPrice"
+    def pricType(self,type,priceTable):
+        return priceTable.pivot_table(index='date',columns="stock_id",values=type)
+    def datePrice(self,start_date,type='close'):
+        ids=set(self.latestId())
+        priceTable=self.singleDateDatasetFromSQL(self.dataset,start_date)
+        priceData=priceTable.pivot_table(index='stock_id',values=type)
+        tableIds=set(priceData.index)
+        interInds=list(ids&tableIds)
+        priceData=priceData.loc[interInds]
+        return priceData[(priceData['close']!=0)]
     def priceIncrease(self,start_date,end_date):
-        priceClose=self.priceType('close')
-        priceIncrease=priceClose.loc[end_date]/priceClose.loc[start_date]-1
-        return priceIncrease.sort_values()
-
+        startPrice=self.datePrice(start_date)
+        endPrice=self.datePrice(end_date)
+        priceIncrease=round((endPrice/startPrice-1)*100,2)['close']
+        return priceIncrease[(priceIncrease.notna()) & (priceIncrease!=-100)].sort_values()
+    def increaseRank(self,increaseSeries):
+        increaseRank=round(increaseSeries.rank()/len(increaseSeries)*100)
+        increaseTable=pd.DataFrame({'increase%':increaseSeries,"increaseRank":increaseRank})
+        return increaseTable
 class LocalValue(DayData):
     def __init__(self):
         super().__init__()
