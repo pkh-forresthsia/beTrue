@@ -53,8 +53,8 @@ class StatementData(SeasenData):
     def priceEstimateTable(self,epsSeries,growthSeries):
         data=pd.DataFrame({'EPS4season':epsSeries,'growth':growthSeries})
         data['estimatePrice']=0
-        for i in range(len(data)):
-            if data['EPS4season'][i]>0 and (data['growth'][i]>=0 or data['growth'][i]<0):
-                data['estimatePrice'][i]=self.estimatePrice(data['EPS4season'][i],data['growth'][i])
+        data=data[(data['EPS4season']>0)&(~data['growth'].isnull())]
+        data['estimatePrice']=data.apply(lambda row:self.estimatePrice(row['EPS4season'],row['growth']),axis=1)
         return data[data['estimatePrice']!=0]
+        
 
