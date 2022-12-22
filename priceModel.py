@@ -24,18 +24,22 @@ class DiscountModel(StatementData):
         data=pd.DataFrame({'price':latestPrice})
         data=pd.merge(priceEstimateTable,data,right_index=True,left_index=True)
         data['priceHigher']=round((data['price']/data['estimatePrice']-1)*100)
+        data['growth']=round(data['growth']*100,1)
         data=data[data['price']!=0]
         return data
     def discountTable(self,epsSeries):
         data=pd.DataFrame({'EPS4season':round(epsSeries,2),'price':self.latestPrice()})
         data=data[(data['EPS4season'].notna())&(data['price'].notna())]
         data['disRate']=-100
-        print('stock_id,4seasonEPS,price,discountRate')
-        for i in range(len(data)):
-            if data['EPS4season'][i]>0 and data['price'][i]>0:
-                data['disRate'][i]=self.discountRate(round(data['EPS4season'][i],2),data['price'][i])*100
-                print(data.index[i],',',data['EPS4season'][i],',',data['price'][i],',',data['disRate'][i])
-                # print(data.index[i],data['EPS4season'][i],data['price'][i])
+        data['EPS4season']=round(data['EPS4season'],2)
+        data=data[(data['EPS4season']>0)&data['price']>0]
+        data['diRate']=data.apply(lambda row:self.discountRate(row['EPS4season'],row['price']),axis=1)
+        # print('stock_id,4seasonEPS,price,discountRate')
+        # for i in range(len(data)):
+        #     # if data['EPS4season'][i]>0 and data['price'][i]>0:
+            # data['disRate'][i]=self.discountRate(round(data['EPS4season'][i],2),data['price'][i])*100
+        #     print(data.index[i],',',data['EPS4season'][i],',',data['price'][i],',',data['disRate'][i])
+        #         # print(data.index[i],data['EPS4season'][i],data['price'][i])
         return data
     def estimateDiffTable(self,priceEstimateTable,discountTable):
         df=pd.merge(priceEstimateTable,discountTable,right_index=True,left_index=True)

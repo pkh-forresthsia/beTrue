@@ -35,6 +35,11 @@ class DateManage():
             return str(date.year)+"-11-14"
         else:
             return str(date.year-1)+"-03-31"  
+    def seasonTrans(self,dateList):
+        transDate=dateList
+        for i in range(len(transDate)):
+            transDate[i]=self.seasonRelease(dateList[i])
+        return transDate
     def monthRelease(self,dateStr):
         date=self.transToDate(dateStr)
         if date.month==1:
@@ -44,3 +49,8 @@ class DateManage():
                 return str(date.year)+"-0"+str(date.month-1)+"-10"
             else:
                 return str(date.year)+"-"+str(date.month-1)+"-10" 
+    def monthTrans(self,dateList):
+        transDate=dateList
+        for i in range(len(transDate)):
+            transDate[i]=self.monthRelease(dateList[i])
+        return transDate        

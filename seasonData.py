@@ -6,17 +6,16 @@ class SeasenData(FromSQL):
         super().__init__()    
         self.yearSeason=4
         self.transMap={
-            "TaiwanStockFinancialStatements":[
-                ("IncomeAfterTaxes","IncomeAfterTax"),
-                ("IncomeFromContinuingOperations","IncomeAfterTax"),
-                ("TotalNonoperatingIncomeAndExpense","TotalNonbusinessIncome")
-            ]
+            "TaiwanStockFinancialStatements":{
+                "IncomeAfterTaxes":"IncomeAfterTax",
+                "IncomeFromContinuingOperations":"IncomeAfterTax",
+                "TotalNonoperatingIncomeAndExpense":"TotalNonbusinessIncome"
+            }
         }
         self.dt=DataTrans()
     def datasetTable(self,dataset):
         datasetFromTable=self.datasetFromSQL(dataset)
-        for item in self.transMap[dataset]:
-            datasetFromTable['type']=datasetFromTable['type'].str.replace(item[0],item[1])
+        datasetFromTable['type'].replace(to_replace=self.transMap[dataset], inplace= True)
         return datasetFromTable
     def nYearIncrease(self,n,table):
         nperiodIncrease=self.dt.nPeriodIncrease(n*self.yearSeason,table,self.yearSeason).iloc[-1]
