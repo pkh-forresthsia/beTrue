@@ -48,7 +48,9 @@ class InfoId(Param):
     def mergeId(self,data):
         ids=self.getId()
         return pd.merge(ids,data,how="inner")  
-
+    def mergeIdIndex(self,indexTable):
+        ids=self.getId().set_index('stock_id')
+        return pd.merge(ids,indexTable, left_index=True, right_index=True)         
 class DataTrans():
     def nMean(self,n,pivotTable):
         return pivotTable.rolling(n).mean()

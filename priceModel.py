@@ -4,6 +4,7 @@ from seasonData import *
 class DiscountModel(StatementData):
     def __init__(self):
         super().__init__()   
+        self.infoId=InfoId()
         # self.latestDay=self.latestDate("TaiwanStockPrice").iloc[-1]
     def discountRate(self,eps,price,g=0.02,e=0.1):
         if eps<0:
@@ -26,25 +27,26 @@ class DiscountModel(StatementData):
         data['priceHigher']=round((data['price']/data['estimatePrice']-1)*100)
         data['growth']=round(data['growth']*100,1)
         data=data[data['price']!=0]
-        return data
+        return self.infoId.mergeIdIndex(data)
+        # return data
+    def defaultPriceEstimateDifferTable(self,n=5):
+        priceEstimateTable=self.defaultPriceEstimateTable(n)
+        return self.priceEstimateDifferTable(priceEstimateTable)
     def discountTable(self,epsSeries):
         data=pd.DataFrame({'EPS4season':round(epsSeries,2),'price':self.latestPrice()})
         data=data[(data['EPS4season'].notna())&(data['price'].notna())]
         data['disRate']=-100
         data['EPS4season']=round(data['EPS4season'],2)
         data=data[(data['EPS4season']>0)&data['price']>0]
-        data['diRate']=data.apply(lambda row:self.discountRate(row['EPS4season'],row['price']),axis=1)
-        # print('stock_id,4seasonEPS,price,discountRate')
-        # for i in range(len(data)):
-        #     # if data['EPS4season'][i]>0 and data['price'][i]>0:
-            # data['disRate'][i]=self.discountRate(round(data['EPS4season'][i],2),data['price'][i])*100
-        #     print(data.index[i],',',data['EPS4season'][i],',',data['price'][i],',',data['disRate'][i])
-        #         # print(data.index[i],data['EPS4season'][i],data['price'][i])
+        data['pe']=data['price']/data['EPS4season']
+        data['disRate']=data.apply(lambda row:self.peMap(row['pe']),axis=1)
         return data
     def estimateDiffTable(self,priceEstimateTable,discountTable):
         df=pd.merge(priceEstimateTable,discountTable,right_index=True,left_index=True)
         data=df[(df['estimatePrice']!=0)&(df['price']!=0)]
+        data['growth']=round(data['growth']*100,1)
+        data['pe']=round(data['pe'],1)
         data['priceHigher']=round((data['price']/data['estimatePrice']-1)*100)
         data['growthHigher']=round((data['growth']/data['disRate']-1)*100)
-        data['pd']=round(data['price']/data['EPS4season_x'],1)
-        return data[['growth','disRate','estimatePrice','price','EPS4season_x','growthHigher','priceHigher']].sort_values(by='priceHigher')
+        data=data[['growth','disRate','growthHigher','estimatePrice','price','pe','EPS4season_x','priceHigher']].sort_values(by='priceHigher')
+        return  self.infoId.mergeIdIndex(data)
