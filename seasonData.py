@@ -1,7 +1,7 @@
 from data import *
 from sympy import *
 
-class SeasenData(FromSQL):
+class SeasonData(FromSQL):
     def __init__(self):
         super().__init__()    
         self.yearSeason=4
@@ -25,11 +25,7 @@ class SeasenData(FromSQL):
         for i in range(len(data)):
             data[i]=(data[i]/100+1)**(1/n)-1
         return data
-    def latestSum(self,table):
-        data=self.dt.nSum(self.yearSeason,table).iloc[-1]
-        data=data[data.notna()]
-        return data
-class StatementData(SeasenData):
+class StatementData(SeasonData):
     def __init__(self):
         super().__init__()   
         self.statement=self.datasetTable("TaiwanStockFinancialStatements")
