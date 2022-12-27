@@ -31,8 +31,10 @@ class StatementData(SeasonData):
         self.statement=self.datasetTable("TaiwanStockFinancialStatements")
     def typeData(self,type):
         statement=self.statement
-        typeData=self.statement[statement['type']==type].pivot_table(index='date',values='value',columns='stock_id')   
-        return typeData
+        typeData=self.statement[statement['type']==type].pivot_table(index='date',values='value',columns='stock_id')
+        indexList=list(typeData.index)
+        indexMap=dict(zip(list(typeData.index),self.dm.seasonTrans(indexList)))   
+        return typeData.rename(mapper=indexMap,axis=0)
     def estimatePrice(self,eps,growth1,growth2=0.02,n=5,g=0.02,e=0.1):
         r=(1+g)/(1+e)
         tempSum=0

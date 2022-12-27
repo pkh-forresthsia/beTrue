@@ -1,16 +1,14 @@
 from data import *
+from dayData import *
 
-class BackTest(FromSQL):
+class BackTest(DayData):
     def __init__(self):
         super().__init__()
-    def fillConditionDate(self,mainData,condData,indexDate='date'):
-        mainDate=list(mainData.index)
-        condDate=list(condData.index)
-        differDate=[]
-        for date in condDate:
-            if date not in mainDate:
-                differDate.append(date)
-        for date in differDate:
-            mainData.loc[date]=0
-        mainData=mainData.sort_values(indexDate)
+    def fillConditionDate(self,dataset="TaiwanStockFinancialStatements"):
+        priceData=self.priceType('close',self.price)
+        if dataset in self.allDataset['seasonData']:
+            setDate=pd.DataFrame({'date':self.dm.seasonTrans(self.dateInSQL(dataset))}).set_index('date')
+        else:
+            setData=pd.DataFrame({'date':self.dm.monthTrans(self.dateInSQL(dataset))}).set_index('date')
+        df=pd.concat([priceData,setDate],axis=1).sort_values('date')
     
