@@ -30,6 +30,12 @@ class Param():
             "TaiwanStockMonthRevenue":['revenue'],
             "TaiwanStockPrice":['Trading_Volume','Trading_money','open','max','min','close','spread','Trading_turnover']
         }
+        self.yearDate=250
+        self.monthDate=20
+        self.seasonDate=60
+        self.yearMonth=12
+        self.seasonMonth=3
+        
     def getData(self,parameter):
         resp=requests.get(self.url,params=parameter)
         try:

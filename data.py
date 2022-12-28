@@ -150,6 +150,7 @@ class Update(ToSQL):
 class FromSQL(Update):
     def __init__(self):
         super().__init__()
+        self.dt=DataTrans()
     def datasetFromSQL(self,dataset):
         connstr=self.connstr1+dataset+".db"
         conn=sqlite3.connect(connstr)

@@ -12,7 +12,6 @@ class SeasonData(FromSQL):
                 "TotalNonoperatingIncomeAndExpense":"TotalNonbusinessIncome"
             }
         }
-        self.dt=DataTrans()
     def datasetTable(self,dataset):
         datasetFromTable=self.datasetFromSQL(dataset)
         datasetFromTable['type'].replace(to_replace=self.transMap[dataset], inplace= True)
@@ -69,8 +68,8 @@ class StatementData(SeasonData):
         data=data[(data['EPS4season']>0)&(~data['growth'].isnull())]
         data['estimatePrice']=round(data.apply(lambda row:self.estimatePrice(row['EPS4season'],row['growth']),axis=1),1)
         return data[data['estimatePrice']!=0]
-    def defaultPriceEstimateTable(self,n=5):
-        epsData=self.typeData("EPS")
+    def defaultPriceEstimateTable(self,n=5,type='EPS'):
+        epsData=self.typeData(type)
         epsSeries=self.latestSum(epsData)
         incomeAfterTax=self.typeData('IncomeAfterTax')-self.typeData('TotalNonbusinessIncome')
         nYearIncrease=self.nYearIncrease(n,incomeAfterTax)

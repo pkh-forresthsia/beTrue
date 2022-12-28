@@ -5,9 +5,7 @@ class DayData(FromSQL):
         super().__init__()
         self.price=self.datasetFromSQL("TaiwanStockPrice")
         self.connstrLocalValue='../data/localValue/'
-        self.yearDate=250
-        self.monthDate=20
-        self.seasonDate=60
+
 class RelativeStrong(FromSQL):
     def __init__(self):
         super().__init__()
