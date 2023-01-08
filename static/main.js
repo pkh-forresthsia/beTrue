@@ -1,17 +1,17 @@
 document.getElementById("defaultOpen").click();
 document.getElementById("loader").style.display = "none";
 
-function getSingleData(){
+function getSingleData() {
     document.getElementById("loader").style.display = "block"
-    const stockIdElement=document.getElementById('stockId')
-    const stockId=stockIdElement.value
-    console.log("get form data",stockId)
-    fetch("http://127.0.0.1:5000/test").then(function(response){
+    const stockIdElement = document.getElementById('stockId')
+    const stockId = stockIdElement.value
+    console.log("get form data", stockId)
+    fetch("/test").then(function (response) {
         return response.json()
-    }).then(function(data){
-        const okeys=Object.keys(data)
+    }).then(function (data) {
+        const okeys = Object.keys(data)
         console.log(okeys.length)
-        firstOvalues=Object.values(data)[0]
+        firstOvalues = Object.values(data)[0]
         console.log(firstOvalues)
         console.log(Object.keys(firstOvalues).length)
         console.log(data)
@@ -43,4 +43,4 @@ function openContent(evt, cityName) {
 function showPage() {
     document.getElementById("loader").style.display = "none";
     // document.getElementById("myDiv").style.display = "block";
-  }
+}

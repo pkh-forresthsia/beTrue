@@ -13,10 +13,10 @@ def home():
     return render_template("index.html", navData=singleDataNav)
 
 
-@app.route("/test")
-def test():
+@app.route("/test/<stockId>")
+def test(stockId):
     apiData = FromAPI()
-    return apiData.singleStock('2330', '2022-12-01', '2022-12-10', "TaiwanStockPrice").to_json()
+    return apiData.singleStock(stockId, '2022-12-01', '2022-12-10', "TaiwanStockPrice").to_json()
 
 
 if __name__ == "__main__":
