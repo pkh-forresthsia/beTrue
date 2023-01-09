@@ -3,7 +3,7 @@
 {% block nav %}
 <ul class="nav justify-content-center">
     {% for item in navData %}
-    {% if item=='overview' %}
+    {% if item==firstNav %}
     <li class="nav-item" onclick="openContent(event,'{{item}}')" id="defaultOpen">
         <a href="#" class="nav-link active" aria-current="page">{{item}}</a>
     </li>
@@ -25,7 +25,37 @@
 {% for item in navData %}
 <div id="{{item}}" class="tabcontent">
     <h3>{{item}}</h3>
-    <div id="{{item+" -content"}}">test content</div>
+    <div id="{{item+" -content"}}">
+        <table class="table">
+            <thead>
+                <tr>
+                    <!-- <th scope="col">#</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Last</th>
+                    <th scope="col">Handle</th> -->
+                </tr>
+            </thead>
+            <!-- <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td colspan="2">Larry the Bird</td>
+                    <td>@twitter</td>
+                </tr>
+            </tbody> -->
+        </table>
+    </div>
 </div>
 {% endfor %}
 <div id="loader"></div>

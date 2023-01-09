@@ -5,11 +5,14 @@ function getSingleData() {
     document.getElementById("loader").style.display = "block"
     const stockIdElement = document.getElementById('stockId')
     const stockId = stockIdElement.value
-    console.log("get form data", stockId)
-    fetch("/test").then(function (response) {
+    console.log("get form data", "/test/"+stockId)
+    fetch("/test/"+stockId).then(function (response) {
         return response.json()
     }).then(function (data) {
         const okeys = Object.keys(data)
+        // for (i=0;i<okeys.length;i++){
+
+        // }
         console.log(okeys.length)
         firstOvalues = Object.values(data)[0]
         console.log(firstOvalues)

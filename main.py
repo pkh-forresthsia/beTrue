@@ -4,13 +4,14 @@ from data import *
 
 app = Flask(__name__)
 
+firstNav='overview'
 singleDataNav = ['overview', 'month revenue',
-                 'income statement', 'evaluate price']
+                 'income statement']
 
 
 @app.route("/")
 def home():
-    return render_template("index.html", navData=singleDataNav)
+    return render_template("index.html", firstNav=firstNav,navData=singleDataNav)
 
 
 @app.route("/test/<stockId>")
