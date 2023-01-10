@@ -13,11 +13,14 @@
     </li>
     {% endif %}
     {% endfor %}
-    <form class="d-flex" action="#">
-        <input class="form-control me-2" type="text" placeholder="input stock id here" aria-label="Search" value="2330"
-            name="stockId" id="stockId">
-        <button class="btn btn-outline-primary" type="submit" value="submit" onclick="getList()">submit</button>
-    </form>
+    <div id="inputForm">
+        <form class="d-flex" action="">
+            <input class="form-control me-2" type="text" placeholder="input stock id here" aria-label="Search" value="1101"
+                name="stockId" id="stockId" >
+            <button class="btn btn-outline-primary" type="button"  onclick="getList()" >submit</button>
+        </form>
+    </div>
+
 </ul>
 {% endblock %}
 
@@ -27,38 +30,15 @@
     <h3>{{item}}</h3>
     <div>
         <table class="table" id="{{item+" -table"}}">
-            <!-- <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">First</th>
-                    <th scope="col">Last</th>
-                    <th scope="col">Handle</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td colspan="2">Larry the Bird</td>
-                    <td>@twitter</td>
-                </tr>
-            </tbody> -->
+
         </table>
     </div>
 </div>
 {% endfor %}
-<div id="loader"></div>
+<div id="overlay">
+    <div id="loader"></div>
+</div>
+
 {% endblock %}
 
 {% block script %}

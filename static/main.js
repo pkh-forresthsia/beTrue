@@ -1,13 +1,20 @@
+
 document.getElementById("defaultOpen").click();
+document.getElementById("overlay").style.display = "none";
 document.getElementById("loader").style.display = "none";
-getList()
+
+
+getSingleData()
 
 
 function getSingleData(tabName="overview",url="/test/") {
+    document.getElementById("overlay").style.display = "block";
     document.getElementById("loader").style.display = "block"
-    let stockIdElement = document.getElementById('stockId')
-    let stockId = stockIdElement.value
+    let stockId = document.getElementById('stockId').value;
+    
+    console.log("print stock id",stockId)
     let tableContent=document.getElementById(tabName+" -table")
+    tableContent.innerHTML=''
     let thead=document.createElement("thead")
     let theadTr=document.createElement("tr")
     let tbody=document.createElement("tbody")
@@ -35,7 +42,7 @@ function getSingleData(tabName="overview",url="/test/") {
                 tbodyTr.appendChild(trTd)
             }
         }
-
+        // stockIdElement.value=newStockId
         showPage()
     })
 }
@@ -66,4 +73,5 @@ function openContent(evt, cityName) {
 
 function showPage() {
     document.getElementById("loader").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
 }
