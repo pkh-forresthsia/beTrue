@@ -1,25 +1,46 @@
 document.getElementById("defaultOpen").click();
 document.getElementById("loader").style.display = "none";
+getList()
 
-function getSingleData() {
+
+function getSingleData(tabName="overview",url="/test/") {
     document.getElementById("loader").style.display = "block"
-    const stockIdElement = document.getElementById('stockId')
-    const stockId = stockIdElement.value
-    console.log("get form data", "/test/"+stockId)
-    fetch("/test/"+stockId).then(function (response) {
+    let stockIdElement = document.getElementById('stockId')
+    let stockId = stockIdElement.value
+    let tableContent=document.getElementById(tabName+" -table")
+    let thead=document.createElement("thead")
+    let theadTr=document.createElement("tr")
+    let tbody=document.createElement("tbody")
+    thead.appendChild(theadTr)
+    tableContent.appendChild(thead)
+    tableContent.appendChild(tbody)
+
+    fetch(url+stockId).then(function (response) {
         return response.json()
     }).then(function (data) {
         const okeys = Object.keys(data)
-        // for (i=0;i<okeys.length;i++){
+        const ovalues = Object.values(data)
+  
+        for (i=0;i<okeys.length;i++){
+            let trTh=document.createElement('th')
+            trTh.textContent=okeys[i]
+            theadTr.appendChild(trTh)
+        }
+        for (i=0;i<Object.keys(ovalues[0]).length;i++){
+            let tbodyTr=document.createElement('tr')
+            tbody.appendChild(tbodyTr)
+            for (j=0;j<okeys.length;j++){
+                let trTd=document.createElement('td')
+                trTd.textContent=ovalues[j][i]
+                tbodyTr.appendChild(trTd)
+            }
+        }
 
-        // }
-        console.log(okeys.length)
-        firstOvalues = Object.values(data)[0]
-        console.log(firstOvalues)
-        console.log(Object.keys(firstOvalues).length)
-        console.log(data)
         showPage()
     })
+}
+function getList(){
+    getSingleData()
 }
 
 function openContent(evt, cityName) {
@@ -45,5 +66,4 @@ function openContent(evt, cityName) {
 
 function showPage() {
     document.getElementById("loader").style.display = "none";
-    // document.getElementById("myDiv").style.display = "block";
 }
