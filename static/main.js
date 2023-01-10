@@ -2,10 +2,7 @@
 document.getElementById("defaultOpen").click();
 document.getElementById("overlay").style.display = "none";
 document.getElementById("loader").style.display = "none";
-
-
-getSingleData()
-
+getList()
 
 function getSingleData(tabName="overview",url="/test/") {
     document.getElementById("overlay").style.display = "block";

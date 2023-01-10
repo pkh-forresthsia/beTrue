@@ -14,10 +14,12 @@
     {% endif %}
     {% endfor %}
     <div id="inputForm">
-        <form class="d-flex" action="">
+        <form class="d-flex" action="" method = "post" keyup="if (event.keyCode==13){getList()}">
+            <input type="text" style="display: none;">
             <input class="form-control me-2" type="text" placeholder="input stock id here" aria-label="Search" value="1101"
                 name="stockId" id="stockId" >
-            <button class="btn btn-outline-primary" type="button"  onclick="getList()" >submit</button>
+            
+            <button class="btn btn-outline-primary" type="button"  onclick="return getList()" >submit</button>
         </form>
     </div>
 

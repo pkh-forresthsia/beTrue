@@ -9,7 +9,7 @@ singleDataNav = ['overview', 'month revenue',
                  'income statement']
 
 
-@app.route("/")
+@app.route("/",methods = ['POST', 'GET'])
 def home():
     return render_template("index.html", firstNav=firstNav,navData=singleDataNav)
 # @app.route("/revene/<stockId>")
