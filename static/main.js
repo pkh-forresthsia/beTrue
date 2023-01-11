@@ -4,11 +4,11 @@ document.getElementById("overlay").style.display = "none";
 document.getElementById("loader").style.display = "none";
 getList()
 
-function getSingleData(tabName="overview",url="/test/") {
+function getSingleData(tabName="overview",url="/table/") {
     document.getElementById("overlay").style.display = "block";
     document.getElementById("loader").style.display = "block"
     let stockId = document.getElementById('stockId').value;
-    
+
     console.log("print stock id",stockId)
     let tableContent=document.getElementById(tabName+" -table")
     tableContent.innerHTML=''
@@ -22,9 +22,10 @@ function getSingleData(tabName="overview",url="/test/") {
     fetch(url+stockId).then(function (response) {
         return response.json()
     }).then(function (data) {
+        console.log('response',data)
         const okeys = Object.keys(data)
         const ovalues = Object.values(data)
-  
+        
         for (i=0;i<okeys.length;i++){
             let trTh=document.createElement('th')
             trTh.textContent=okeys[i]
