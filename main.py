@@ -1,6 +1,7 @@
 from flask import Flask, redirect, url_for, render_template, session, request
 from data import *
 from apiData import *
+import json
 
 
 app = Flask(__name__)
@@ -19,8 +20,8 @@ def table(stockId):
     api=API(stockId)
     # allTable={'priceTable':api.priceApi.to_json(),'revenueTable':api.revenueApi.to_json()}
     allTable={'revenueTable':api.revenueApi.to_json()}
-    return allTable['revenueTable']
-
+    # return allTable['revenueTable']
+    return json.dumps(allTable)
 
 @app.route("/test/<stockId>")
 def test(stockId):
@@ -29,4 +30,4 @@ def test(stockId):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0',port=5000)
