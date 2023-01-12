@@ -1,8 +1,13 @@
+let tabMap=[['overview','priceTable'],['month revenue','revenueTable']]
 
 document.getElementById("defaultOpen").click();
 document.getElementById("overlay").style.display = "none";
 document.getElementById("loader").style.display = "none";
+
 createAllContent()
+for(let i=0;i<tabMap.length;i++){
+    console.log(tabMap[i][1])
+}
 
 function createContent(tabName="overview",table='revenueTable',url="/table/") {
     loadingPage()
@@ -11,14 +16,19 @@ function createContent(tabName="overview",table='revenueTable',url="/table/") {
     fetch(url+stockId).then(function (response) {
         return response.json()
     }).then(function (data) {
+
         data=JSON.parse(data[table]) 
+        
         createTable(tabName,data)
         showPage()
     })
 }
 function createAllContent(){
     createContent()
-    createContent('month revenue','revenueTable')
+    
+    // revenueContent=JSON.parse(content['revenueTable']) 
+    // createTable('month revenue',revenueContent)
+    // createContent('month revenue','revenueTable')
 }
 
 function openContent(evt, cityName) {
