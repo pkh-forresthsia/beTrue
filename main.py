@@ -21,7 +21,8 @@ def table(stockId):
     # allTable={'priceTable':api.priceApi.to_json(),'revenueTable':api.revenueApi.to_json()}
     allTable={'revenueTable':api.revenueApi.to_json()}
     # return allTable['revenueTable']
-    return json.dumps(allTable)
+    return allTable['revenueTable']
+
 
 @app.route("/test/<stockId>")
 def test(stockId):

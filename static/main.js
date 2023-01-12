@@ -20,11 +20,9 @@ function getSingleData(tabName="overview",url="/table/") {
     tableContent.appendChild(tbody)
 
     fetch(url+stockId).then(function (response) {
-        return response
+        return response.json()
     }).then(function (data) {
-        data=JSON.parse(JSON.parse(data)['revenueTable'])
         console.log('response', data)
-        
         const okeys = Object.keys(data)
         const ovalues = Object.values(data)
         
