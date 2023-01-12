@@ -7,7 +7,7 @@ class API(FromAPI):
         self.today=self.dm.transToString(self.dm.todayDate())
         self.stock_id=stock_id
         self.revenueApi=self.revenueApi()
-        self.priceApi=self.priceApi()
+        # self.priceApi=self.priceApi()
         # self.financialApi=self.financialApi()
     def revenueApi(self):
         return self.singleStock(self.stock_id,self.start_date,self.today,"TaiwanStockMonthRevenue")
@@ -15,6 +15,6 @@ class API(FromAPI):
         return self.singleStock(self.stock_id,self.start_date,self.today,"TaiwanStockPrice")
     def financialApi(self):
         return self.singleStock(self.stock_id,self.start_date,self.today,"TaiwanStockFinancialStatements")
-    def revenueTable(self,revenueDataFrame):
-        return
+    # def revenueTable(self,revenueDataFrame):
+    #     return
 

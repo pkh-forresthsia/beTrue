@@ -18,13 +18,8 @@ def home():
 @app.route("/table/<stockId>")
 def table(stockId):
     api=API(stockId)
-    allTable={'priceTable':api.priceApi.to_json(),'revenueTable':api.revenueApi.to_json()}
-    # allTable={'revenueTable':api.revenueApi.to_json()}
-    # return allTable['revenueTable']
-
-    # allTable={'revenueTable':api.revenueApi.to_json()}
+    allTable={'overviewTable':api.priceApi.to_json(),'revenueTable':api.revenueApi.to_json()}
     return json.dumps(allTable) 
-
 
 @app.route("/test/<stockId>")
 def test(stockId):

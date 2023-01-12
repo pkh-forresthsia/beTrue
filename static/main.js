@@ -1,34 +1,27 @@
-let tabMap=[['overview','priceTable'],['month revenue','revenueTable']]
+let tabMap=[['overview','overviewTable'],['month revenue','revenueTable']]
 
 document.getElementById("defaultOpen").click();
 document.getElementById("overlay").style.display = "none";
 document.getElementById("loader").style.display = "none";
 
 createAllContent()
-for(let i=0;i<tabMap.length;i++){
-    console.log(tabMap[i][1])
-}
 
-function createContent(tabName="overview",table='revenueTable',url="/table/") {
+function createContent(tabMap,url="/table/") {
     loadingPage()
     let stockId = document.getElementById('stockId').value;
-    console.log("print stock id",stockId)
     fetch(url+stockId).then(function (response) {
         return response.json()
     }).then(function (data) {
-
-        data=JSON.parse(data[table]) 
-        
-        createTable(tabName,data)
+        for(let i=0;i<tabMap.length;i++){
+            console.log("table",tabMap[i][1])
+            let data1={...JSON.parse(data[tabMap[i][1]])}
+            createTable(tabMap[i][0],data1)
+        }
         showPage()
     })
 }
 function createAllContent(){
-    createContent()
-    
-    // revenueContent=JSON.parse(content['revenueTable']) 
-    // createTable('month revenue',revenueContent)
-    // createContent('month revenue','revenueTable')
+    createContent(tabMap)
 }
 
 function openContent(evt, cityName) {
